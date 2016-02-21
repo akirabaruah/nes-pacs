@@ -1,6 +1,6 @@
 # nes-pacs
 
-This project attempts to emulate the hardware of the Nintendo
+This project aims to emulate the hardware of the Nintendo
 Entertainment System (NES) on an Altera Cyclone V FPGA.
 
 
