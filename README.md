@@ -21,6 +21,9 @@ SystemVerilog:
 - Ricoh 2A03 processor (including audio processing unit)
 - NES Picture Processing Unit (PPU)
 
+Implement a regression test suite to ensure that the CPU and PPU excecute
+instructions accurately. This will begin by writing simulations in quartus
+and end with loading NES games onto the fpga.
 
 ## Project Team
 
