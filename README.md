@@ -5,7 +5,7 @@ Entertainment System (NES) on an Altera Cyclone V FPGA.
 
 ![NES mb](https://github.com/akira-baruah/nes-pacs/blob/master/nes.jpg?raw=true)
 
-[[source]](https://133fsb.wordpress.com/2009/11/28/restoring-a-nice-famiclone-part-2)
+[[img source]](https://133fsb.wordpress.com/2009/11/28/restoring-a-nice-famiclone-part-2)
 
 ## Background
 
@@ -24,7 +24,7 @@ SystemVerilog:
 
 ## Project Team
 
-This project is conducted as part of Stephen Edwards's [Embedded
+This project is conducted as part of Stephen Edwards' [Embedded
 Systems](http://www.cs.columbia.edu/~sedwards/classes/2016/4840-spring/index.html)
 (CSEE 4840) course at Columbia University.
 
