@@ -3,6 +3,10 @@
 This project aims to emulate the hardware of the Nintendo
 Entertainment System (NES) on an Altera Cyclone V FPGA.
 
+![NES mb](https://github.com/akira-baruah/nes-pacs/blob/master/nes.jpg?raw=true)
+
+[[source]](https://133fsb.wordpress.com/2009/11/28/restoring-a-nice-famiclone-part-2)
+
 ## Background
 
 The NES uses an 8-bit processor, with a 16-bit address space, based on
