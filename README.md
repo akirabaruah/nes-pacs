@@ -3,7 +3,7 @@
 This project aims to emulate the hardware of the Nintendo
 Entertainment System (NES) on an Altera Cyclone V FPGA.
 
-![NES mb](https://github.com/akira-baruah/nes-pacs/blob/master/nes.jpg?raw=true)
+![NES mb](https://github.com/akira-baruah/nes-pacs/blob/master/src/nes.jpg?raw=true)
 
 [[img source]](https://133fsb.wordpress.com/2009/11/28/restoring-a-nice-famiclone-part-2)
 
