@@ -27,6 +27,7 @@ and end with loading NES games onto the fpga.
 ## Requirements
 
 This project uses the following tools:
+
 - [Icarus Verilog](http://iverilog.icarus.com)
 - [Verilator](http://veripool.org/wiki/verilator)
 - [GNU Make](https://gnu.org/software/make)
