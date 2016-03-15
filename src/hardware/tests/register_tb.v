@@ -5,11 +5,11 @@ module reg8_tb;
 
    // Device under test
    register dut (.clk (clk),
-				 .rst (rst),
-				 .load (load),
-				 .in (in),
-				 .out (out)
-				 );
+                 .rst (rst),
+                 .load (load),
+                 .in (in),
+                 .out (out)
+                 );
 
    // Initial state
    initial begin
