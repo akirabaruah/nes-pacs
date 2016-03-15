@@ -7,7 +7,7 @@ int main(int argc, char **argv) {
 	int time;
 
 	printf("%8s,%8s,%8s,%8s,%8s,%8s\n",
-		   "time", "clk", "reset", "load", "in", "out");
+		   "time", "clk", "rst", "load", "in", "out");
 
 	// Timestepping loop
 	for (time = 0; time <= 50; time++) {
@@ -17,12 +17,12 @@ int main(int argc, char **argv) {
 		switch (time) {
 		case 0:
 			r->clk = 0;
-			r->reset = 1;
+			r->rst = 1;
 			r->load = 0;
 			r->in = 0x2a;
 			break;
 		case 3:
-			r->reset = 0;
+			r->rst = 0;
 			r->load = 1;
 			break;
 		case 13:
@@ -30,10 +30,10 @@ int main(int argc, char **argv) {
 			r->in = 0x7b;
 			break;
 		case 23:
-			r->reset = 1;
+			r->rst = 1;
 			break;
 		case 33:
-			r->reset = 0;
+			r->rst = 0;
 			break;
 		case 43:
 			r->load = 1;
@@ -44,7 +44,7 @@ int main(int argc, char **argv) {
 
 		r->eval();
 		printf("%8d,%8x,%8x,%8x,%8.2x,%8.2x\n",
-			   time, r->clk, r->reset, r->load, r->in, r->out);
+			   time, r->clk, r->rst, r->load, r->in, r->out);
 		assert(r->out == r->out);
 	}
 	r->final();
