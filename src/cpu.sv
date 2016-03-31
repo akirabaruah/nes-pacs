@@ -15,11 +15,12 @@ module cpu (input clk,
    logic [7:0] alu_a; // ALU A register
    logic [7:0] alu_b; // ALU B register
 
+   assign acc = 0;
 
-   alu ALU(.alu_a(alu_a)
-   		   .alu_b(alu_b)
-		   .carry_in( )
-		   .alu_out( )
+   alu ALU(.alu_a(alu_a),
+   		   .alu_b(alu_b),
+		   .carry_in(status[1]),
+		   .alu_out(d_out),
 		   .carry_out(status[0]));
 
 
@@ -87,6 +88,6 @@ module cpu (input clk,
         ZP  = 3'b001,
         IMM = 3'b010,
         ABS = 3'b011,
-        ZPY = 3'b100,
+        ZPY = 3'b100
     ;    
 endmodule // cpu

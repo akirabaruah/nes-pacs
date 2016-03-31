@@ -1,6 +1,6 @@
 TESTDIR=tests
 ASMDIR=asm
-SUBMODULES= pc.sv
+SUBMODULES= pc.sv alu.sv
 
 .PHONY: all
 all: Vcpu test.out

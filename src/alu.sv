@@ -6,8 +6,8 @@ module alu (input [7:0] alu_a,
 		   output carry_out,
 		   output overflow);
 
-   carry_out = 0;
-   overflow = 0;
+   assign carry_out = 0;
+   assign overflow = 0;
 
    parameter
       ALU_ADD = 3'd0,
@@ -17,10 +17,10 @@ module alu (input [7:0] alu_a,
 	  ALU_SRS = 3'd4
    ;
    
-   always_comb
-      case (mode)
-	
-
+   always_comb begin
+	  case (mode)
+         ALU_ADD: alu_out = alu_a + alu_b;
+		 default: alu_out = alu_a + alu_b;
 	  endcase
    end
 
