@@ -28,4 +28,24 @@ module cpu (input clk,
 
    assign addr = pc_temp;
 
+   /*
+    * OP CODES
+    */
+
+    parameter
+        ORA = 3'b000,
+        AND = 3'b001,
+        EOR = 3'b010,
+        ADC = 3'b011,
+        STA = 3'b100,
+        LDA = 3'b101,
+        CMP = 3'b110,
+        SBC = 3'b111,
+
+        ZPX = 3'b000,
+        ZP  = 3'b001,
+        IMM = 3'b010,
+        ABS = 3'b011,
+        ZPY = 3'b100,
+    ;    
 endmodule // cpu
