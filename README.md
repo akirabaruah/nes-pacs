@@ -28,9 +28,9 @@ and end with loading NES games onto the fpga.
 
 This project uses the following tools:
 
-- [Icarus Verilog](http://iverilog.icarus.com)
-- [Verilator](http://veripool.org/wiki/verilator)
 - [GNU Make](https://gnu.org/software/make)
+- [Verilator](http://veripool.org/wiki/verilator)
+- [xa (xa65)](http://www.floodgap.com/retrotech/xa)
 
 ## Project Team
 
