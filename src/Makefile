@@ -1,17 +1,22 @@
 TESTDIR=tests
+ASMDIR=asm
 
 .PHONY: all
-all: Vcpu
+all: Vcpu test.out
 
-# Icarus Verilog
-%.vpp: %.v $(TESTDIR)/%_tb.v
-	iverilog -o $@ $^
+.PHONY: run_test
+run_test: test.out
+	obj_dir/Vcpu $^
 
 # Verilator
 V%: %.sv $(TESTDIR)/%_tb.cpp
 	verilator -Wall -Wno-lint --cc $< --exe $(word 2,$^)
 	make --quiet -C obj_dir/ -j -f $@.mk $@
 
+# xa65 (6502 assembler)
+%.out: $(ASMDIR)/%.s
+	xa -o $@ $^
+
 .PHONY: clean
 clean:
-	rm -rf *.vpp *.vcd obj_dir/
+	rm -rf obj_dir/ *.out
