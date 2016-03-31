@@ -11,7 +11,7 @@ int main(int argc, char **argv) {
 	Verilated::commandArgs(argc, argv);
 
     if (argc < 2) {
-        cerr << "usage: " << argv[0] << endl;
+        cerr << "usage: " << argv[0] << " <6502 executable>" << endl;
         return 1;
     }
 
@@ -26,9 +26,10 @@ int main(int argc, char **argv) {
     while (fread(&input, 1, 1, program)) {
         if (Verilated::gotFinish()) { break; }
 
-        cpu->d_in = input;
         printf("%8d,%8.2x,%8.2x,%8.2x\n",
                time, input, cpu->d_out, cpu->addr);
+
+        cpu->d_in = input;
         tick(cpu);
         time++;
     }
