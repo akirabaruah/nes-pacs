@@ -1,3 +1,4 @@
+
 module cpu (input clk,
 			input rst,
 			input [7:0] d_in,
@@ -9,6 +10,8 @@ module cpu (input clk,
 
    assign d_out = 0;
    assign addr = 0;
+   
+   assign pc_rst = 0;
 
    /*
     * Program Counter Logic
@@ -16,16 +19,13 @@ module cpu (input clk,
 
    // TODO: account for not incrementing on singl
 
-   always_ff @ (posedge clk) begin
-	  if (rst) begin
-         pcl <= 8'h00;
-         pch <= 8'h00;
-	  end
-      else begin
-         if (pcl == 8'hff)
-           pch <= pch + 1;
-      end
-      pcl <= pcl + 1;
-   end
+   logic [15:0] pc_temp = {pch, pcl};
+
+   pc PC( .clk(clk),
+          .rst(pc_rst),
+          .pc_in(pc_temp),
+          .pc_out(pc_temp));
+
+   assign addr = pc_temp;
 
 endmodule // cpu

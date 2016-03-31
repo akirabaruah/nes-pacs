@@ -20,16 +20,16 @@ int main(int argc, char **argv) {
     int time = 0;
     unsigned char input;
 
-	printf("%8s,%8s,%8s\n",
-		   "time", "in", "out");
+	printf("%8s,%8s,%8s,%8s\n",
+		   "time", "in", "out", "addr");
 
     while (fread(&input, 1, 1, program)) {
         if (Verilated::gotFinish()) { break; }
 
         cpu->d_in = input;
         tick(cpu);
-        printf("%8d,%8.2x,%8.2x\n",
-               time, input, cpu->d_out);
+        printf("%8d,%8.2x,%8.2x,%8.2x\n",
+               time, input, cpu->d_out, cpu->addr);
         time++;
     }
     cpu->final();

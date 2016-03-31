@@ -1,5 +1,6 @@
 TESTDIR=tests
 ASMDIR=asm
+SUBMODULES= pc.sv
 
 .PHONY: all
 all: Vcpu test.out
@@ -10,7 +11,7 @@ run_test: test.out
 
 # Verilator
 V%: %.sv $(TESTDIR)/%_tb.cpp
-	verilator -Wall -Wno-lint --cc $< --exe $(word 2,$^)
+	verilator -Wall -Wno-lint --cc $< $(SUBMODULES) --exe $(word 2,$^)
 	make --quiet -C obj_dir/ -j -f $@.mk $@
 
 # xa65 (6502 assembler)
