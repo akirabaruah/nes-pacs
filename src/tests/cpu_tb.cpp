@@ -27,9 +27,9 @@ int main(int argc, char **argv) {
         if (Verilated::gotFinish()) { break; }
 
         cpu->d_in = input;
-        tick(cpu);
         printf("%8d,%8.2x,%8.2x,%8.2x\n",
                time, input, cpu->d_out, cpu->addr);
+        tick(cpu);
         time++;
     }
     cpu->final();
