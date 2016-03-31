@@ -5,8 +5,51 @@ module cpu (input clk,
 			output [7:0] d_out,
 			output [15:0] addr);
 
-   logic [7:0] pcl;
-   logic [7:0] pch;
+   logic [7:0] pcl; // Program counter low
+   logic [7:0] pch; // Program counter high
+
+   logic [15:0] pc_temp = {pch, pcl};
+   logic [7:0] status; // Processor flags
+   logic [7:0] acc; // Accumulator
+
+   logic [7:0] alu_a; // ALU A register
+   logic [7:0] alu_b; // ALU B register
+
+
+   alu ALU(.alu_a(alu_a)
+   		   .alu_b(alu_b)
+		   .carry_in( )
+		   .alu_out( )
+		   .carry_out(status[0]));
+
+
+   // TODO: MISSING!!!!!!
+   // alu_b needs to get data from other places
+   // like X, Y, PCL/PCH????
+
+   always_ff @(posedge clk) begin
+      alu_b <= d_in;
+      alu_a <= acc;
+
+   end
+
+   /* 
+    *  Processor status flags
+	*  C - Carry
+	*  Z - Zero Result
+	*  I - Interrupt Disable
+	*  D - Decimal Mode
+	*  B - Break Command
+	*  X - Nothing
+	*  V - Overflow
+	*  N - Negative Result
+	*/
+
+
+
+
+
+
 
    assign d_out = 0;
    assign addr = 0;
@@ -19,13 +62,11 @@ module cpu (input clk,
 
    // TODO: account for not incrementing on singl
 
-   logic [15:0] pc_temp = {pch, pcl};
 
    pc PC( .clk(clk),
           .rst(pc_rst),
           .pc_in(pc_temp),
           .pc_out(pc_temp));
-
    assign addr = pc_temp;
 
    /*
