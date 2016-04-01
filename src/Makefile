@@ -3,7 +3,7 @@ ASMDIR=asm
 SUBMODULES= pc.sv alu.sv
 
 .PHONY: all
-all: Vcpu test.out
+all: Vcpu test.out test_alu.out
 
 .PHONY: run_test
 run_test: test.out

@@ -1,3 +1,24 @@
+ 
+   /*
+    * OP CODES
+    */
+
+    parameter
+        ORA = 5'b00001,
+        AND = 5'b00101,
+        EOR = 5'b01001,
+        ADC = 5'b01101,
+        STA = 5'b10001,
+        LDA = 5'b10101,
+        CMP = 5'b11001,
+        SBC = 5'b11101,
+
+        ZPX = 5'b00001,
+        ZP  = 5'b00101,
+        IMM = 5'b01001,
+        ABS = 5'b01101,
+        ZPY = 5'b10001
+    ;    
 
 module cpu (input clk,
 			input rst,
@@ -15,13 +36,24 @@ module cpu (input clk,
    logic [7:0] alu_a; // ALU A register
    logic [7:0] alu_b; // ALU B register
 
-   assign acc = 0;
+   logic [4:0] alu_mode;
+
+
+   /*
+    * Decode instruction
+    */   
+     
+   assign alu_mode = {d_in[7:5], d_in[1:0]};
+
+initial 
+   assign acc = 1;
 
    alu ALU(.alu_a(alu_a),
-   		   .alu_b(alu_b),
-		   .carry_in(status[1]),
-		   .alu_out(d_out),
-		   .carry_out(status[0]));
+	   .alu_b(alu_b),
+	   .carry_in(status[1]),
+	   .mode(alu_mode),
+	   .alu_out(d_out),
+	   .carry_out(status[0]));
 
 
    // TODO: MISSING!!!!!!
@@ -31,7 +63,8 @@ module cpu (input clk,
    always_ff @(posedge clk) begin
       alu_b <= d_in;
       alu_a <= acc;
-
+      acc   <= d_out;
+      $display("acc: %h\n", acc);
    end
 
    /* 
@@ -69,25 +102,4 @@ module cpu (input clk,
           .pc_in(pc_temp),
           .pc_out(pc_temp));
    assign addr = pc_temp;
-
-   /*
-    * OP CODES
-    */
-
-    parameter
-        ORA = 3'b000,
-        AND = 3'b001,
-        EOR = 3'b010,
-        ADC = 3'b011,
-        STA = 3'b100,
-        LDA = 3'b101,
-        CMP = 3'b110,
-        SBC = 3'b111,
-
-        ZPX = 3'b000,
-        ZP  = 3'b001,
-        IMM = 3'b010,
-        ABS = 3'b011,
-        ZPY = 3'b100
-    ;    
 endmodule // cpu
