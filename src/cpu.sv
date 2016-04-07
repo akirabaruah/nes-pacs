@@ -81,7 +81,6 @@ initial
       alu_b <= d_in;
       alu_a <= acc;
       acc   <= d_out;
-      $display("acc: %h\n", acc);
    end
 
    /*
@@ -125,7 +124,6 @@ initial
         default: state <= T0;
       endcase
 
-      $display("\n%x\n", state);
    end
 
    /*
