@@ -5,12 +5,11 @@ module alu (input [7:0] alu_a,
 	    output [7:0] alu_out,
 	    output carry_out,
     	    output overflow);
-
-//   assign carry_out = 0;
-//   assign verflow = 0;
    
-   
+   logic temp;    
    always_comb begin
+      carry_out = 0;
+      overflow = 0;
       case (mode)
 	 ADC: begin 
 	      alu_out = alu_a + alu_b; 
@@ -29,17 +28,27 @@ module alu (input [7:0] alu_a,
 	      else 
 	         overflow = alu_out < alu_a;
 	      end
+	 
+	 // TODO: verify direction/orientation
+	 ASL: begin
+	      carry_out = alu_a[0];
+	      alu_out = alu_a << 1;
+	      end
+	 ROL: begin
+	      carry_out = alu_a[0];
+	      alu_out = alu_a << 1;
+	      alu_out[7] = carry_in;
+	      end
+	 LSR: begin
+	      carry_out = alu_a[7];
+              alu_out = alu_a >> 1;
+	      end
+	 ROR: begin
+	      carry_out = alu_a[7];
+	      alu_out = alu_a >> 1;
+	      alu_out[0] = carry_in;
+	      end
 
-	 ASL:
-	 ROL:
-	 LSR:
-	 ROR:
-
-// 	 no code yet
-//	 SRS: begin 
-//	      carry_out = alu_a[7]; 
-// 	      alu_out = alu_a >> 1; 
-//	      end    // Shifting always uses alu_a register?? 
 	 default: alu_out = alu_a; 
       endcase
    end
