@@ -8,9 +8,6 @@ module alu (input [7:0] alu_a,
 
 //   assign carry_out = 0;
 //   assign verflow = 0;
-
-//   if (AND == 00101) 
-//     carry_out = 1;
    
    
    always_comb begin
@@ -25,7 +22,20 @@ module alu (input [7:0] alu_a,
 	 AND: alu_out = alu_a & alu_b;
 	 ORA: alu_out = alu_a | alu_b;
 	 EOR: alu_out = alu_a ^ alu_b;
-// 	 no SRS code yet
+	 SBC: begin
+	      alu_out = alu_a - alu_b;
+	      if (alu_b >= 0)
+	         overflow = alu_out > alu_a;
+	      else 
+	         overflow = alu_out < alu_a;
+	      end
+
+	 ASL:
+	 ROL:
+	 LSR:
+	 ROR:
+
+// 	 no code yet
 //	 SRS: begin 
 //	      carry_out = alu_a[7]; 
 // 	      alu_out = alu_a >> 1; 
