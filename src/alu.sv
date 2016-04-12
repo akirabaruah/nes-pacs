@@ -6,7 +6,6 @@ module alu (input [7:0] alu_a,
 	    output carry_out,
     	    output overflow);
    
-   logic temp;    
    always_comb begin
       carry_out = 0;
       overflow = 0;
@@ -28,8 +27,8 @@ module alu (input [7:0] alu_a,
 	      else 
 	         overflow = alu_out < alu_a;
 	      end
-	 
-	 // TODO: verify direction/orientation
+/*
+         // TODO: verify direction/orientation	      
 	 ASL: begin
 	      carry_out = alu_a[0];
 	      alu_out = alu_a << 1;
@@ -48,8 +47,9 @@ module alu (input [7:0] alu_a,
 	      alu_out = alu_a >> 1;
 	      alu_out[0] = carry_in;
 	      end
+*/
 
-	 default: alu_out = alu_a; 
+   	 default: alu_out = alu_a; 
       endcase
    end
 
