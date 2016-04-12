@@ -111,18 +111,43 @@ initial
    enum {T0, T1, T2, T3, T4, T5, T6} state;
    initial state = T0;
 
+   parameter
+     INX = 3'b000,
+     ZPG = 3'b001,
+     IMM = 3'b010,
+     ABS = 3'b011,
+     INY = 3'b100,
+     ZPX = 3'b101,
+     ABY = 3'b110,
+     ABX = 3'b111;
+
+   logic mode = 2'b01;
+
    always_ff @ (posedge clk) begin
 
       case (state)
         T0: state <= T1;
-        T1: state <= T2;
-        T2: state <= T3;
-        T3: state <= T4;
-        T4: state <= T5;
-        T5: state <= T6;
-        T6: state <= T0;
+        T1: state <= (bbb == IMM) ? T0 : T2;
+        T2: state <= (bbb == ZPG) ? T0 : T3;
+        T3:
+          if (bbb == ABS || bbb == ZPX)
+            state <= T0;
+          else if ((bbb == ABX || bbb == ABY) && !status[0])
+            state <= T0;
+          else
+            state <= T4;
+        T4:
+          if (bbb == ABX || bbb == ABY)
+            state <= T0;
+          else if (bbb == INY && !status[0])
+            state <= T0;
+          else
+            state <= T5;
+        T5: state <= T0;
         default: state <= T0;
       endcase
+
+      $display("state: %d", state);
 
    end
 
