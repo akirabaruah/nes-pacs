@@ -60,8 +60,8 @@ module cpu (input clk,
     * Decode instruction
     */
 
-   assign alu_mode = {d_in[7:5], d_in[1:0]};
-
+	assign alu_instruction = {d_in[7:5], d_in[1:0]};
+	
 initial
    assign acc = 1;
 
@@ -77,11 +77,18 @@ initial
    // alu_b needs to get data from other places
    // like X, Y, PCL/PCH????
 
-   always_ff @(posedge clk) begin
-      alu_b <= d_in;
+	always_ff @(posedge clk) begin
+
+		//if (alu_instruction == ADC)
+			alu_mode <= ALU_ADD;
+		//else
+			//alu_mode <= ALU_AND;
+		//$display("alu_mode: %d", alu_mode);
+
+		alu_b <= d_in;
       alu_a <= acc;
       acc   <= d_out;
-   end
+	end
 
    /*
     *  Processor status flags
