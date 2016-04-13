@@ -7,7 +7,7 @@ INTX_absolute
 INTX_indirectX
 INTX_absoluteXY
 INTX_zeropageXY
-INTX_zeropageXY
+INTX_indirectY
 STORE_zeropage
 STORE_absolute
 STORE_indirectX
