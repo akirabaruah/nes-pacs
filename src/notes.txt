@@ -1,0 +1,21 @@
+# Addressing modes
+
+SBI
+INTX_immediate
+INTX_zeropage
+INTX_absolute
+INTX_indirectX
+INTX_absoluteXY
+INTX_zeropageXY
+INTX_zeropageXY
+STORE_zeropage
+STORE_absolute
+STORE_indirectX
+STORE_absoluteXY
+STORE_zeropageXY
+STORE_indirectY
+RMW_zeropage
+RMW_absolute
+RMW_zeropageX
+RMW_absoluteX
+MISC
