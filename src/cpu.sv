@@ -67,12 +67,16 @@ module cpu (input clk,
 initial
    assign acc = 1;
 
-   alu ALU(.alu_a(alu_a),
+   alu ALU(.clk(clk),
+		.alu_a(alu_a),
 	   .alu_b(alu_b),
+		.mode(alu_mode),
 	   .carry_in(status[1]),
-	   .mode(alu_mode),
 	   .alu_out(d_out),
-	   .carry_out(status[0]));
+	   .carry_out(status[0]),
+		.overflow(status[6]),
+		.zero(status[1]),
+		.sign(status[7]));
 
 
    // TODO: MISSING!!!!!!
