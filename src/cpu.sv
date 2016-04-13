@@ -1,4 +1,31 @@
 
+
+
+/*
+ * Single byte instructions
+ */
+
+parameter
+  CLC = 8'h18,
+  CLD = 8'hD8, 
+  CLI = 8'h58,
+  CLV = 8'hB8,
+  DEX = 8'hCA,
+  DEY = 8'h88,
+  INX = 8'hE8,
+  INY = 8'hC8,
+  NOP = 8'hEA,
+  SEC = 8'h38,
+  SED = 8'hF8,
+  SEI = 8'h78,
+  TAX = 8'hAA,
+  TAY = 8'hA8,
+  TSX = 8'hBA,
+  TXA = 8'h8A,
+  TXS = 8'h9A,
+  TYA = 8'h98
+; 
+
 /*
  * Opcodes {aaa, cc}
  */
@@ -133,7 +160,30 @@ initial
              state <= T1;
              IR <= d_in;
           end
-        T1: state <= (bbb == IMM) ? T0 : T2;
+        T1: begin
+					// Single byte instructions with no addressing mode
+					case (IR)
+						CLC, 		 
+						CLD,
+						CLI,
+						CLV,
+						DEX,
+						DEY,
+						INX,
+						INY,
+						NOP,
+						SEC,
+						SED,
+						SEI,
+						TAX,
+						TAY,
+						TSX,
+						TXA,
+						TXS,
+						TYA: state <= T0;
+					 endcase
+				end
+		// state <= (bbb == IMM) ? T0 : T2;
         T2: state <= (bbb == ZPG) ? T0 : T3;
         T3:
           if (bbb == ABS || bbb == ZPX)
