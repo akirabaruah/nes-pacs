@@ -9,6 +9,10 @@ all: Vcpu test.out test_alu.out
 run_test: test.out
 	obj_dir/Vcpu $^
 
+.PHONY: run_alu_test
+run_alu_test: test_alu.out
+	obj_dir/Vcpu $^
+
 # Verilator
 V%: %.sv $(TESTDIR)/%_tb.cpp
 	verilator -Wall -Wno-lint --cc $< $(SUBMODULES) --exe $(word 2,$^)
