@@ -55,6 +55,8 @@ module cpu (input clk,
 
    logic [4:0] alu_mode;
 
+   logic [7:0] IR; // instruction register
+
 
    /*
     * Decode instruction
@@ -109,7 +111,7 @@ initial
    logic [2:0] aaa;
    logic [2:0] bbb;
    logic [1:0] cc;
-   assign {aaa, bbb, cc} = d_in;
+   assign {aaa, bbb, cc} = IR;
 
    /*
     * Controller FSM
@@ -133,7 +135,11 @@ initial
    always_ff @ (posedge clk) begin
 
       case (state)
-        T0: state <= T1;
+        T0:
+          begin
+             state <= T1;
+             IR <= d_in;
+          end
         T1: state <= (bbb == IMM) ? T0 : T2;
         T2: state <= (bbb == ZPG) ? T0 : T3;
         T3:
@@ -154,7 +160,8 @@ initial
         default: state <= T0;
       endcase
 
-      $display("state: %d", state);
+      $display("state: T%.1d", state);
+      $display("IR: %x", IR);
 
    end
 
