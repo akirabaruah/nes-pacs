@@ -1,13 +1,11 @@
 
-
-
 /*
  * Single byte instructions
  */
 
 parameter
   CLC = 8'h18,
-  CLD = 8'hD8, 
+  CLD = 8'hD8,
   CLI = 8'h58,
   CLV = 8'hB8,
   DEX = 8'hCA,
@@ -24,7 +22,7 @@ parameter
   TXA = 8'h8A,
   TXS = 8'h9A,
   TYA = 8'h98
-; 
+;
 
 /*
  * Opcodes {aaa, cc}
@@ -70,59 +68,48 @@ module cpu (input clk,
 			output [7:0] d_out,
 			output [15:0] addr);
 
-   logic [7:0] pcl; // Program counter low
-   logic [7:0] pch; // Program counter high
+   /*
+    * Registers
+    */
 
-   logic [15:0] pc_temp = {pch, pcl};
-   logic [7:0] status; // Processor flags
-   logic [7:0] acc; // Accumulator
+   logic [7:0] A,     // accumulator
+               X,     // X index
+               Y,     // Y index
+               ALU_A, // ALU input A
+               ALU_B, // ALU input B
+               D_OUT, // data output
+               IR,    // instruction register
+               P,     // processor status
+               PCH,   // program counter high
+               PCL,   // program counter low
+               SP;    // stack pointer
 
-   logic [7:0] alu_a; // ALU A register
-   logic [7:0] alu_b; // ALU B register
-
-   logic [4:0] alu_mode;
-
-   logic [7:0] IR; // instruction register
+   assign d_out = D_OUT;
+   assign addr = {PCH, PCL};
 
 
    /*
-    * Decode instruction
+    * Buses
     */
 
-   assign alu_mode = {d_in[7:5], d_in[1:0]};
+   logic [7:0] bus_d, bus_s;
 
-initial
-   assign acc = 1;
-
-   alu ALU(.alu_a(alu_a),
-	   .alu_b(alu_b),
-	   .carry_in(status[1]),
-	   .mode(alu_mode),
-	   .alu_out(d_out),
-	   .carry_out(status[0]));
-
-
-   // TODO: MISSING!!!!!!
-   // alu_b needs to get data from other places
-   // like X, Y, PCL/PCH????
-
-   always_ff @(posedge clk) begin
-      alu_b <= d_in;
-      alu_a <= acc;
-      acc   <= d_out;
-   end
 
    /*
     *  Processor status flags
-	*  C - Carry
-	*  Z - Zero Result
-	*  I - Interrupt Disable
-	*  D - Decimal Mode
-	*  B - Break Command
-	*  X - Nothing
-	*  V - Overflow
-	*  N - Negative Result
 	*/
+
+   logic P_C, // carry
+         P_Z, // zero result
+         P_I, // interrupt disable
+         P_D, // decimal mode
+         P_B, // break command
+         P_X, // nothing
+         P_V, // overflow
+         P_N; // negative result
+
+   assign P = {P_C, P_Z, P_I, P_D, P_B, P_X, P_V, P_N};
+
 
    /*
     * Instruction Fields
@@ -131,7 +118,25 @@ initial
    logic [2:0] aaa;
    logic [2:0] bbb;
    logic [1:0] cc;
+   logic [4:0] opcode;
+
    assign {aaa, bbb, cc} = IR;
+   assign opcode = {aaa, cc};
+
+   always_ff @ (posedge clk) begin
+      if (state == T0)
+        IR <= d_in;
+   end
+
+
+   /*
+    * Predecode logic
+    */
+
+   always_comb begin
+
+   end
+
 
    /*
     * Controller FSM
@@ -150,52 +155,27 @@ initial
      ABY = 3'b110,
      ABX = 3'b111;
 
-   logic mode = 2'b01;
-
    always_ff @ (posedge clk) begin
 
       case (state)
-        T0:
-          begin
-             state <= T1;
-             IR <= d_in;
-          end
-        T1: begin
-					// Single byte instructions with no addressing mode
-					case (IR)
-						CLC, 		 
-						CLD,
-						CLI,
-						CLV,
-						DEX,
-						DEY,
-						INX,
-						INY,
-						NOP,
-						SEC,
-						SED,
-						SEI,
-						TAX,
-						TAY,
-						TSX,
-						TXA,
-						TXS,
-						TYA: state <= T0;
-					 endcase
-				end
-		// state <= (bbb == IMM) ? T0 : T2;
+        T0: begin
+           state <= T1;
+           if (bbb == IMM)
+             A <= bus_s;
+        end
+        T1: state <= (bbb == IMM) ? T0 : T2;
         T2: state <= (bbb == ZPG) ? T0 : T3;
         T3:
           if (bbb == ABS || bbb == ZPX)
             state <= T0;
-          else if ((bbb == ABX || bbb == ABY) && !status[0])
+          else if ((bbb == ABX || bbb == ABY) && !P[0])
             state <= T0;
           else
             state <= T4;
         T4:
           if (bbb == ABX || bbb == ABY)
             state <= T0;
-          else if (bbb == INY && !status[0])
+          else if (bbb == INY && !P[0])
             state <= T0;
           else
             state <= T5;
@@ -203,25 +183,55 @@ initial
         default: state <= T0;
       endcase
 
-      $display("state: T%.1d", state);
-      $display("IR: %x", IR);
+      $display("state: T%.1d, IR: %x, bus_s: %x, A: %x", state, IR, bus_s, A);
+      $display("IMM: %.1d, bbb: %.1d", IMM, bbb);
 
    end
+
+
+   /*
+    * Control logic
+    */
+
+   always_comb begin
+
+      casex ({state,bbb})
+        {T1, IMM}: begin
+           bus_d = d_in;
+           bus_s = A;
+        end
+        {T0, IMM}: begin
+           bus_d = alu_out;
+           bus_s = A;
+        end
+      endcase
+
+   end
+
 
    /*
     * Program Counter Logic
     */
 
-   assign d_out = 0;
-   assign addr = 0;
-   assign pc_rst = 0;
+   always_ff @ (posedge clk) begin
+      {PCH, PCL} <= {PCH, PCL} + 1;
+   end
 
-   // TODO: account for not incrementing on single-byte instruction
 
-   pc PC( .clk(clk),
-          .rst(pc_rst),
-          .pc_in(pc_temp),
-          .pc_out(pc_temp));
-   assign addr = pc_temp;
+   /*
+    * Arithmetic Logic Unit (ALU)
+    */
+
+   logic [7:0] alu_out;
+   logic       carry_out;
+
+   alu cpu_alu (.alu_a(ALU_A),
+                .alu_b(ALU_B),
+                .mode(opcode),
+                .carry_in(0),
+                .alu_out(alu_out),
+                .carry_out(carry_out),
+                .overflow(P_V)
+                );
 
 endmodule // cpu
