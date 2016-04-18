@@ -23,8 +23,8 @@ module alu (input clk,
 	
 	always_comb begin
       case (mode)
-			ALU_ADD: tmp_out = alu_a + alu_b + carry_in; 
-			ALU_AND: tmp_out = alu_a & alu_b;
+			ALU_ADD: begin tmp_out = alu_a + alu_b + carry_in; $display("added"); end
+			ALU_AND: begin tmp_out = alu_a & alu_b; $display("anded"); end
 	 		ALU_OR : tmp_out = alu_a | alu_b;
 	 		ALU_EOR: tmp_out = alu_a ^ alu_b;
 	 		ALU_SR : tmp_out = alu_a << 1;
