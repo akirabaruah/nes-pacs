@@ -130,19 +130,52 @@ module cpu (input clk,
 
 
    /*
-    * Predecode logic
-    */
-
-   always_comb begin
-
-   end
-
-
-   /*
     * Controller FSM
     */
 
-   enum {T0, T1, T2, T3, T4, T5, T6} state;
+   enum {
+         /* Indexed Indirect X */
+         INX_T1,
+         INX_T2,
+         INX_T3,
+         INX_T4,
+         INX_T5,
+
+         /* Zero page */
+         ZP_T1,
+         ZP_T2,
+
+         /* Immediate */
+         IMM_T1,
+
+         /* Absolute */
+         ABS_T1,
+         ABS_T2,
+         ABS_T3,
+
+         /* Indirect Indexed Y */
+         INY_T1,
+         INY_T2,
+         INY_T3,
+         INY_T4,
+         INY_T5,
+
+         /* Absolute X */
+         ABSX_T1,
+         ABSX_T2,
+         ABSX_T3,
+         ABSX_T4,
+
+         /* Absolute X */
+         ABSY_T1,
+         ABSY_T2,
+         ABSY_T3,
+         ABSY_T4,
+
+         /* Decode state */
+         T0
+         } state;
+
    initial state = T0;
 
    parameter
@@ -158,28 +191,13 @@ module cpu (input clk,
    always_ff @ (posedge clk) begin
 
       case (state)
-        T0: begin
-           state <= T1;
-           if (bbb == IMM)
-             A <= bus_s;
-        end
-        T1: state <= (bbb == IMM) ? T0 : T2;
-        T2: state <= (bbb == ZPG) ? T0 : T3;
-        T3:
-          if (bbb == ABS || bbb == ZPX)
-            state <= T0;
-          else if ((bbb == ABX || bbb == ABY) && !P[0])
-            state <= T0;
-          else
-            state <= T4;
-        T4:
-          if (bbb == ABX || bbb == ABY)
-            state <= T0;
-          else if (bbb == INY && !P[0])
-            state <= T0;
-          else
-            state <= T5;
-        T5: state <= T0;
+        T0:
+          casex (d_in)
+            8'bxxx_010_01: state <= IMM_T1;
+          endcase
+
+        IMM_T1: state <= T0;
+
         default: state <= T0;
       endcase
 
@@ -190,22 +208,40 @@ module cpu (input clk,
 
 
    /*
+    * Control signals
+    */
+
+   /* Writer to DB */
+   parameter
+     DB_d_in = 3'd0,
+     DB_A = 3'd1,
+     DB_PCL = 3'd2,
+     DB_PCH = 3'd3,
+     DB_P = 3'd4;
+
+   /* Writer to SB */
+   parameter
+     SB_ALU = 3'd0,
+     SB_A = 3'd1,
+     SB_X = 3'd2,
+     SB_Y = 3'd3,
+     SB_SP = 3'd3;
+
+   /* Buses */
+   logic db, sb;
+
+   /*
     * Control logic
     */
 
-   always_comb begin
+   always_ff @ (posedge clk) begin
+      casex (state)
 
-      casex ({state,bbb})
-        {T1, IMM}: begin
-           bus_d = d_in;
-           bus_s = A;
+        IMM_T1: begin
+           A <= d_in;
         end
-        {T0, IMM}: begin
-           bus_d = alu_out;
-           bus_s = A;
-        end
+
       endcase
-
    end
 
 
