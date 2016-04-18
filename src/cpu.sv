@@ -1,5 +1,30 @@
 
 /*
+ * Single byte instructions
+ */
+
+parameter
+  CLC = 8'h18,
+  CLD = 8'hD8,
+  CLI = 8'h58,
+  CLV = 8'hB8,
+  DEX = 8'hCA,
+  DEY = 8'h88,
+  INX = 8'hE8,
+  INY = 8'hC8,
+  NOP = 8'hEA,
+  SEC = 8'h38,
+  SED = 8'hF8,
+  SEI = 8'h78,
+  TAX = 8'hAA,
+  TAY = 8'hA8,
+  TSX = 8'hBA,
+  TXA = 8'h8A,
+  TXS = 8'h9A,
+  TYA = 8'h98
+;
+
+/*
  * Opcodes {aaa, cc}
  */
 
@@ -54,82 +79,34 @@ module cpu (input clk,
 			output [7:0] d_out,
 			output [15:0] addr);
 
-   logic [7:0] pcl; // Program counter low
-   logic [7:0] pch; // Program counter high
-
-   logic [15:0] pc_temp = {pch, pcl};
-   logic [7:0] status; // Processor flags
-   logic [7:0] acc; // Accumulator
-
-   logic [7:0] alu_a; // ALU A register
-   logic [7:0] alu_b; // ALU B register
+   /*
+    * Registers
+    */
 
    logic [4:0] alu_mode;
    logic [4:0] alu_instruction;
+   logic [7:0] A,     // accumulator
+               X,     // X index
+               Y,     // Y index
+               ALU_A, // ALU input A
+               ALU_B, // ALU input B
+               D_OUT, // data output
+               IR,    // instruction register
+               P,     // processor status
+               PCH,   // program counter high
+               PCL,   // program counter low
+               SP;    // stack pointer
 
-   logic [7:0] IR; // instruction register
+   assign d_out = D_OUT;
+   assign addr = {PCH, PCL};
 
 
    /*
-    * Decode instruction
+    * Buses
     */
 
-	assign alu_instruction = {d_in[7:5], d_in[1:0]};
-	
-initial
-   assign acc = 1;
+   logic [7:0] bus_d, bus_s;
 
-	logic temp =  1; // NO IDEA IF THIS IS OK
-
-   alu ALU(
-		.alu_a(alu_a),
-	   .alu_b(alu_b),
-		.mode(alu_mode),
-	   .carry_in(temp),
-	   .alu_out(d_out),
-	   .carry_out(status[0]),
-		.overflow(status[6]),
-		.zero(status[1]),
-		.sign(status[7]));
-
-
-   // TODO: MISSING!!!!!!
-   // alu_b needs to get data from other places
-   // like X, Y, PCL/PCH????
-
-	always_ff @(posedge clk) begin
-
-   //$display("alu_instruction: %b", alu_instruction);
-		//if (alu_instruction == ADC)
-		
-		case (alu_instruction)
-			AND: alu_mode <= ALU_AND;
-			ADC: alu_mode <= ALU_ADD;
-			//ORA: alu_mode <= ALU_OR;
-			//EOR: alu_mode <= ALU_EOR;
-			//SBC: alu_mode <= ALU_SUB;
-			default: alu_mode <= 49;
-		endcase
-		//else
-			//alu_mode <= ALU_AND;
-		//$display("alu_mode: %d", alu_mode);
-
-		alu_b <= d_in;
-      alu_a <= acc;
-      acc   <= d_out;
-	end
-
-   /*
-    *  Processor status flags
-	*  C - Carry
-	*  Z - Zero Result
-	*  I - Interrupt Disable
-	*  D - Decimal Mode
-	*  B - Break Command
-	*  X - Nothing
-	*  V - Overflow
-	*  N - Negative Result
-	*/
 
    /*
     * Instruction Fields
@@ -138,13 +115,64 @@ initial
    logic [2:0] aaa;
    logic [2:0] bbb;
    logic [1:0] cc;
+   logic [4:0] opcode;
+
    assign {aaa, bbb, cc} = IR;
+   assign opcode = {aaa, cc};
+
+   always_ff @ (posedge clk) begin
+      if (state == T0)
+        IR <= d_in;
+   end
+
 
    /*
     * Controller FSM
     */
 
-   enum {T0, T1, T2, T3, T4, T5, T6} state;
+   enum {
+         /* Indexed Indirect X */
+         INX_T1,
+         INX_T2,
+         INX_T3,
+         INX_T4,
+         INX_T5,
+
+         /* Zero page */
+         ZP_T1,
+         ZP_T2,
+
+         /* Immediate */
+         IMM_T1,
+
+         /* Absolute */
+         ABS_T1,
+         ABS_T2,
+         ABS_T3,
+
+         /* Indirect Indexed Y */
+         INY_T1,
+         INY_T2,
+         INY_T3,
+         INY_T4,
+         INY_T5,
+
+         /* Absolute X */
+         ABSX_T1,
+         ABSX_T2,
+         ABSX_T3,
+         ABSX_T4,
+
+         /* Absolute X */
+         ABSY_T1,
+         ABSY_T2,
+         ABSY_T3,
+         ABSY_T4,
+
+         /* Decode state */
+         T0
+         } state;
+
    initial state = T0;
 
    parameter
@@ -157,55 +185,117 @@ initial
      ABY = 3'b110,
      ABX = 3'b111;
 
-//   logic mode = 2'b01;
-
    always_ff @ (posedge clk) begin
 
       case (state)
         T0:
-          begin
-             state <= T1;
-             IR <= d_in;
-          end
-        T1: state <= (bbb == IMM) ? T0 : T2;
-        T2: state <= (bbb == ZPG) ? T0 : T3;
-        T3:
-          if (bbb == ABS || bbb == ZPX)
-            state <= T0;
-          else if ((bbb == ABX || bbb == ABY) && !status[0])
-            state <= T0;
-          else
-            state <= T4;
-        T4:
-          if (bbb == ABX || bbb == ABY)
-            state <= T0;
-          else if (bbb == INY && !status[0])
-            state <= T0;
-          else
-            state <= T5;
-        T5: state <= T0;
+          casex (d_in)
+            8'bxxx_010_01: state <= IMM_T1;
+          endcase
+
+        IMM_T1: state <= T0;
+
         default: state <= T0;
       endcase
 
-//      $display("state: T%.1d", state);
-//      $display("IR: %x", IR);
+      $display("state: T%.1d, IR: %x, bus_s: %x, A: %x", state, IR, bus_s, A);
+      $display("IMM: %.1d, bbb: %.1d", IMM, bbb);
 
    end
+
+
+   /*
+    * Control signals
+    */
+
+   /* Writer to DB */
+   parameter
+     DB_d_in = 3'd0,
+     DB_A = 3'd1,
+     DB_PCL = 3'd2,
+     DB_PCH = 3'd3,
+     DB_P = 3'd4;
+
+   /* Writer to SB */
+   parameter
+     SB_ALU = 3'd0,
+     SB_A = 3'd1,
+     SB_X = 3'd2,
+     SB_Y = 3'd3,
+     SB_SP = 3'd3;
+
+   /* Buses */
+   logic db, sb;
+
+   /*
+    * Control logic
+    */
+
+   always_ff @ (posedge clk) begin
+      casex (state)
+
+        IMM_T1: begin
+           A <= d_in;
+        end
+
+      endcase
+   end
+
 
    /*
     * Program Counter Logic
     */
 
-   assign d_out = 0;
-   assign addr = 0;
-   assign pc_rst = 0;
+   always_ff @ (posedge clk) begin
+      {PCH, PCL} <= {PCH, PCL} + 1;
+   end
 
-   // TODO: account for not incrementing on single-byte instruction
 
-   pc PC( .clk(clk),
-          .rst(pc_rst),
-          .pc_in(pc_temp),
-          .pc_out(pc_temp));
-   assign addr = pc_temp;
+   /*
+    * Arithmetic Logic Unit (ALU)
+    */
+
+   assign alu_instruction = {d_in[7:5], d_in[1:0]};
+
+   logic temp =  1; // NO IDEA IF THIS IS OK
+
+   always_ff @(posedge clk) begin
+
+      //$display("alu_instruction: %b", alu_instruction);
+	  //if (alu_instruction == ADC)
+
+	  case (alu_instruction)
+		AND: alu_mode <= ALU_AND;
+		ADC: alu_mode <= ALU_ADD;
+		//ORA: alu_mode <= ALU_OR;
+		//EOR: alu_mode <= ALU_EOR;
+		//SBC: alu_mode <= ALU_SUB;
+		default: alu_mode <= 49;
+	  endcase
+	  //else
+	  //alu_mode <= ALU_AND;
+	  //$display("alu_mode: %d", alu_mode);
+
+	  alu_b <= d_in;
+      alu_a <= A;
+      A <= alu_out;
+   end
+
+   // TODO: MISSING!!!!!!
+   // alu_b needs to get data from other places
+   // like X, Y, PCL/PCH????
+
+   logic [7:0] alu_out;
+
+   alu ALU(
+		   .alu_a(alu_a),
+	       .alu_b(alu_b),
+		   .mode(alu_mode),
+	       .carry_in(temp),
+	       .alu_out(alu_out),
+	       .carry_out(P[0]),
+		   .overflow(P[6]),
+		   .zero(P[1]),
+		   .sign(P[7]));
 
 endmodule // cpu
