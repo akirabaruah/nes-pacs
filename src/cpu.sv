@@ -105,6 +105,9 @@ initial
 		case (alu_instruction)
 			AND: alu_mode <= ALU_AND;
 			ADC: alu_mode <= ALU_ADD;
+			//ORA: alu_mode <= ALU_OR;
+			//EOR: alu_mode <= ALU_EOR;
+			//SBC: alu_mode <= ALU_SUB;
 			default: alu_mode <= 49;
 		endcase
 		//else
