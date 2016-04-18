@@ -67,11 +67,13 @@ module cpu (input clk,
 initial
    assign acc = 1;
 
-   alu ALU(.clk(clk),
+	logic carry_in = 1; // NO IDEA IF THIS IS OK
+
+   alu ALU(
 		.alu_a(alu_a),
 	   .alu_b(alu_b),
 		.mode(alu_mode),
-	   .carry_in(status[1]),
+	   .carry_in(temp),
 	   .alu_out(d_out),
 	   .carry_out(status[0]),
 		.overflow(status[6]),
