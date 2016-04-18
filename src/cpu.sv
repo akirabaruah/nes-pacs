@@ -54,6 +54,7 @@ module cpu (input clk,
    logic [7:0] alu_b; // ALU B register
 
    logic [4:0] alu_mode;
+   logic [4:0] alu_instruction;
 
    logic [7:0] IR; // instruction register
 
@@ -87,8 +88,13 @@ initial
 
 	always_ff @(posedge clk) begin
 
+   $display("alu_instruction: %b", alu_instruction);
 		//if (alu_instruction == ADC)
-			alu_mode <= ALU_ADD;
+		case (alu_instruction)
+			AND: alu_mode <= ALU_AND;
+			ADC: alu_mode <= ALU_ADD;
+			default: alu_mode <= ALU_ADD;
+		endcase
 		//else
 			//alu_mode <= ALU_AND;
 		//$display("alu_mode: %d", alu_mode);

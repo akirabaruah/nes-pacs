@@ -26,13 +26,10 @@ module alu (input [7:0] alu_a,
 	assign carry_out = tmp_out[8];
 
 	always_comb begin
-		//carry_out = 0;
-		//overflow = 0;
-      
 		case (mode)
-			ALU_ADD: tmp_out = alu_a + alu_b + carry_in; 
+			ALU_ADD: begin tmp_out = alu_a + alu_b + carry_in; $display("added"); end
 			ALU_SUB: tmp_out = alu_a + ~alu_b + carry_in;
-			ALU_AND: tmp_out = alu_a & alu_b;
+			ALU_AND: begin tmp_out = alu_a & alu_b; $display("anded"); end
 	 		ALU_OR : tmp_out = alu_a | alu_b;
 	 		ALU_EOR: tmp_out = alu_a ^ alu_b;
 	 		ALU_SR : tmp_out = {alu_a[0], carry_in, alu_a[7:1]};
