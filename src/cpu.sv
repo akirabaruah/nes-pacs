@@ -1,29 +1,3 @@
-
-/*
- * Single byte instructions
- */
-
-parameter
-  CLC = 8'h18,
-  CLD = 8'hD8,
-  CLI = 8'h58,
-  CLV = 8'hB8,
-  DEX = 8'hCA,
-  DEY = 8'h88,
-  INX = 8'hE8,
-  INY = 8'hC8,
-  NOP = 8'hEA,
-  SEC = 8'h38,
-  SED = 8'hF8,
-  SEI = 8'h78,
-  TAX = 8'hAA,
-  TAY = 8'hA8,
-  TSX = 8'hBA,
-  TXA = 8'h8A,
-  TXS = 8'h9A,
-  TYA = 8'h98
-;
-
 /*
  * Opcodes {aaa, cc}
  */
@@ -100,13 +74,8 @@ module cpu (input clk,
    assign d_out = D_OUT;
    assign addr = {PCH, PCL};
 
-
-   /*
-    * Buses
-    */
-
-   logic [7:0] bus_d, bus_s;
-
+	logic temp_carry_out;
+	logic temp_carry_in;
 
    /*
     * Instruction Fields
@@ -198,9 +167,8 @@ module cpu (input clk,
         default: state <= T0;
       endcase
 
-      $display("state: T%.1d, IR: %x, bus_s: %x, A: %x", state, IR, bus_s, A);
-      $display("IMM: %.1d, bbb: %.1d", IMM, bbb);
-
+//      $display("state: T%.1d, IR: %x, bus_s: %x, A: %x", state, IR, bus_s, A);
+//      $display("IMM: %.1d, bbb: %.1d", IMM, bbb); 
    end
 
 
@@ -257,7 +225,6 @@ module cpu (input clk,
 
    assign alu_instruction = {d_in[7:5], d_in[1:0]};
 
-   logic temp =  1; // NO IDEA IF THIS IS OK
 
    always_ff @(posedge clk) begin
 
@@ -279,6 +246,7 @@ module cpu (input clk,
 	  alu_b <= d_in;
       alu_a <= A;
       A <= alu_out;
+      carry_in_temp <= P[0];
    end
 
    // TODO: MISSING!!!!!!
@@ -289,11 +257,11 @@ module cpu (input clk,
 
    alu ALU(
 		   .alu_a(alu_a),
-	       .alu_b(alu_b),
+	      .alu_b(alu_b),
 		   .mode(alu_mode),
-	       .carry_in(temp),
-	       .alu_out(alu_out),
-	       .carry_out(P[0]),
+	      .carry_in(carry_in_temp),
+	      .alu_out(alu_out),
+	      .carry_out(P[0]),
 		   .overflow(P[6]),
 		   .zero(P[1]),
 		   .sign(P[7]));
