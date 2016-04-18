@@ -38,7 +38,8 @@ parameter
 	ALU_AND = 1,
 	ALU_OR  = 2,
 	ALU_EOR = 3,
-	ALU_SR  = 4
+	ALU_SR  = 4,
+   ALU_SUB = 5
 ;
 
 /*
@@ -78,11 +79,13 @@ module cpu (input clk,
 initial
    assign acc = 1;
 
-   alu ALU(.clk(clk),
+	logic temp =  1; // NO IDEA IF THIS IS OK
+
+   alu ALU(
 		.alu_a(alu_a),
 	   .alu_b(alu_b),
 		.mode(alu_mode),
-	   .carry_in(status[1]),
+	   .carry_in(temp),
 	   .alu_out(d_out),
 	   .carry_out(status[0]),
 		.overflow(status[6]),
