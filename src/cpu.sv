@@ -4,23 +4,23 @@
  */
 
 parameter
-  ORA = 5'b000_10,
-  AND = 5'b001_10,
-  EOR = 5'b010_10,
-  ADC = 5'b011_10,
-  STA = 5'b100_10,
-  LDA = 5'b101_10,
-  CMP = 5'b110_10,
-  SBC = 5'b111_10,
+  ORA = 5'b000_01,
+  AND = 5'b001_01,
+  EOR = 5'b010_01,
+  ADC = 5'b011_01,
+  STA = 5'b100_01,
+  LDA = 5'b101_01,
+  CMP = 5'b110_01,
+  SBC = 5'b111_01,
 
-  ASL = 5'b000_01,
-  ROL = 5'b001_01,
-  LSR = 5'b010_01,
-  ROR = 5'b011_01,
-  STX = 5'b100_01,
-  LDX = 5'b101_01,
-  DEC = 5'b110_01,
-  INC = 5'b111_01,
+  ASL = 5'b000_10,
+  ROL = 5'b001_10,
+  LSR = 5'b010_10,
+  ROR = 5'b011_10,
+  STX = 5'b100_10,
+  LDX = 5'b101_10,
+  DEC = 5'b110_10,
+  INC = 5'b111_10,
 
   BRK = 5'b000_00,
   BIT = 5'b001_00,
@@ -30,6 +30,16 @@ parameter
   LDY = 5'b101_00,
   CPY = 5'b110_00,
   CPX = 5'b111_00;
+
+
+
+parameter
+	ALU_ADD = 0,
+	ALU_AND = 1,
+	ALU_OR  = 2,
+	ALU_EOR = 3,
+	ALU_SR  = 4
+;
 
 /*
  * Addressing Modes
@@ -86,12 +96,13 @@ initial
 
 	always_ff @(posedge clk) begin
 
-   $display("alu_instruction: %b", alu_instruction);
+   //$display("alu_instruction: %b", alu_instruction);
 		//if (alu_instruction == ADC)
+		
 		case (alu_instruction)
 			AND: alu_mode <= ALU_AND;
 			ADC: alu_mode <= ALU_ADD;
-			default: alu_mode <= ALU_ADD;
+			default: alu_mode <= 49;
 		endcase
 		//else
 			//alu_mode <= ALU_AND;
@@ -140,7 +151,7 @@ initial
      ABY = 3'b110,
      ABX = 3'b111;
 
-   logic mode = 2'b01;
+//   logic mode = 2'b01;
 
    always_ff @ (posedge clk) begin
 
@@ -170,8 +181,8 @@ initial
         default: state <= T0;
       endcase
 
-      $display("state: T%.1d", state);
-      $display("IR: %x", IR);
+//      $display("state: T%.1d", state);
+//      $display("IR: %x", IR);
 
    end
 

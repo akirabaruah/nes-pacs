@@ -1,6 +1,6 @@
 ADC #$03
 SBC #$10
-AND #$00
-AND #$00
+AND #$01
+AND #$01
 AND #$00
 AND #$00

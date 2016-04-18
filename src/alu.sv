@@ -1,11 +1,3 @@
-parameter
-	ALU_ADD = 0,
-	ALU_AND = 1,
-	ALU_OR  = 2,
-	ALU_EOR = 3,
-	ALU_SR  = 4
-;
-
 // we are not implementing decimal / half carry
 
 module alu (input clk,
@@ -21,10 +13,15 @@ module alu (input clk,
    
 	logic [8:0] tmp_out; //9 bit add for easy overflow/carry checks
 	
+
 	always_comb begin
+
+
+		$display("alu_a = %d", alu_a);
+		$display("alu_b = %d", alu_b);
       case (mode)
 			ALU_ADD: begin tmp_out = alu_a + alu_b + carry_in; $display("added"); end
-			ALU_AND: begin tmp_out = alu_a & alu_b; $display("anded"); end
+			ALU_AND: begin tmp_out = alu_a & alu_b; $display("butts"); end
 	 		ALU_OR : tmp_out = alu_a | alu_b;
 	 		ALU_EOR: tmp_out = alu_a ^ alu_b;
 	 		ALU_SR : tmp_out = alu_a << 1;
@@ -61,6 +58,7 @@ module alu (input clk,
 
 			default: tmp_out = alu_a; 
 		endcase
+		$display("alu_out = %d", alu_out);
 	end
 
 	always_ff @(posedge clk) begin
