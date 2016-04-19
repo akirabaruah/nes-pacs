@@ -48,10 +48,10 @@ parameter
 // TODO
 
 module cpu (input clk,
-			input rst,
-			input [7:0] d_in,
-			output [7:0] d_out,
-			output [15:0] addr);
+   			input rst,
+   			input [7:0] d_in,
+   			output [7:0] d_out,
+   			output [15:0] addr);
 
    /*
     * Registers
@@ -62,8 +62,8 @@ module cpu (input clk,
    logic [7:0] A,     // accumulator
                X,     // X index
                Y,     // Y index
-               ALU_A, // ALU input A
-               ALU_B, // ALU input B
+               alu_a, // ALU input A
+               alu_b, // ALU input B
                D_OUT, // data output
                IR,    // instruction register
                P,     // processor status
@@ -144,16 +144,6 @@ module cpu (input clk,
 
    initial state = T0;
 
-   parameter
-     INX = 3'b000,
-     ZPG = 3'b001,
-     IMM = 3'b010,
-     ABS = 3'b011,
-     INY = 3'b100,
-     ZPX = 3'b101,
-     ABY = 3'b110,
-     ABX = 3'b111;
-
    always_ff @ (posedge clk) begin
 
       case (state)
@@ -193,7 +183,38 @@ module cpu (input clk,
      SB_SP = 3'd3;
 
    /* Buses */
-   logic db, sb;
+   logic [7:0] db;
+   logic [7:0] sb;
+
+
+   /*
+	 * Bus logic
+	 */
+
+	always_comb @ (posedge clk) begin
+
+		case(state)
+			IMM_T1:	
+			casex(IR)
+            8'b000x_xxxx: db <= alu_out;
+            8'b001x_xxxx: db <= alu_out;
+            8'b010x_xxxx: db <= alu_out;
+            8'b011x_xxxx: db <= alu_out;
+            8'b100x_xxxx: db <= alu_out;
+            8'b101x_xxxx: db <= alu_out;
+            8'b110x_xxxx: db <= alu_out;
+            8'b111x_xxxx: db <= alu_out;
+			endcase
+		endcase
+
+		$display("db = %b", db);
+		$display("alu_out = %b", alu_out);
+		$display("acc = %b", A);
+		$display("state = %d", state);
+	end
+
+
+
 
    /*
     * Control logic
@@ -201,11 +222,9 @@ module cpu (input clk,
 
    always_ff @ (posedge clk) begin
       casex (state)
-
-        IMM_T1: begin
-           A <= d_in;
+        T0: begin
+           A <= db; 
         end
-
       endcase
    end
 
@@ -231,9 +250,11 @@ module cpu (input clk,
       //$display("alu_instruction: %b", alu_instruction);
 	  //if (alu_instruction == ADC)
 
+		// if it is a right shift operation, alu_b needs to be zero
+
 	  case (alu_instruction)
 		AND: alu_mode <= ALU_AND;
-		ADC: alu_mode <= ALU_ADD;
+		ADC: begin alu_mode <= ALU_ADD; end
 		//ORA: alu_mode <= ALU_OR;
 		//EOR: alu_mode <= ALU_EOR;
 		//SBC: alu_mode <= ALU_SUB;
@@ -243,10 +264,16 @@ module cpu (input clk,
 	  //alu_mode <= ALU_AND;
 	  //$display("alu_mode: %d", alu_mode);
 
-	  alu_b <= d_in;
+		// TEMPORARY FIX
+		if (state == IMM_T1)
+		   alu_b <= d_in;
       alu_a <= A;
-      A <= alu_out;
+      //A <= alu_out;
       carry_in_temp <= P[0];
+
+   $display("alu_a = %b", alu_a);
+   $display("alu_b = %b", alu_b);
+
    end
 
    // TODO: MISSING!!!!!!
@@ -254,7 +281,6 @@ module cpu (input clk,
    // like X, Y, PCL/PCH????
 
    logic [7:0] alu_out;
-
    alu ALU(
 		   .alu_a(alu_a),
 	      .alu_b(alu_b),
