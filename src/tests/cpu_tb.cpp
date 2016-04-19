@@ -1,12 +1,10 @@
 #include <cstdio>
-#include <cstdlib>
 #include <iostream>
-#include <sys/stat.h>
-#include <sys/mman.h>
-#include <fcntl.h>
 #include "Vcpu.h"
 
 using namespace std;
+
+#define MEMSIZE 65536
 
 void tick(Vcpu *cpu);
 
@@ -20,22 +18,14 @@ int main(int argc, char **argv) {
     }
 
     Vcpu *cpu = new Vcpu;
+    char memory[MEMSIZE];
     int time = 0;
-    unsigned char input;
+    uint16_t addr = 0;
+    uint8_t input;
 
-	/* mmap test program */
-	const char *program;
-	int fd;
-	struct stat sb;
-	off_t prog_len;
-	off_t pc; // offset into file to read
-
-	fd  = open(argv[1], O_RDONLY);
-	fstat(fd, &sb);
-	prog_len = sb.st_size;
-
-	program = static_cast<char *>(mmap(NULL, prog_len, PROT_READ, MAP_PRIVATE, fd, 0));
-	if (program == MAP_FAILED) exit(1);
+    /* Read assembled binary into simulated memory */
+    FILE *binary = fopen(argv[1], "r");
+    size_t len = fread(memory, 1, MEMSIZE, binary);
 
 	printf("%8s,%8s,%8s,%8s\n",
 		   "time", "in", "out", "addr");
@@ -43,10 +33,10 @@ int main(int argc, char **argv) {
 	while (1) {
         if (Verilated::gotFinish()) { break; }
 
-		pc = cpu->addr;
-		if (pc >= prog_len) break; // for now, break if we read past file
+        addr = cpu->addr;
+		if (addr >= len) break;
 
-		input = program[pc];
+        input = memory[addr];
         cpu->d_in = input;
 
         printf("%8d,%8.2x,%8.2x,%8.2x\n",
