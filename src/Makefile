@@ -1,25 +1,11 @@
 TESTDIR=tests
+TESTS=	test_alu.out test_adc.out test_sbc.out \
+		test_cmp.out test_logic.out
 ASMDIR=asm
 SUBMODULES= alu.sv
 
 .PHONY: all
-all: Vcpu test.out test_alu.out
-
-.PHONY: run_test
-run_test: test.out
-	obj_dir/Vcpu $^
-
-.PHONY: run_alu_test
-run_alu_test: test_alu.out
-	obj_dir/Vcpu $^
-
-.PHONY: run_adc_test
-run_adc_test: test_adc.out
-	obj_dir/Vcpu $^
-
-.PHONY: run_sbc_test
-run_sbc_test: test_sbc.out
-	obj_dir/Vcpu $^
+all: Vcpu $(TESTS)
 
 # Verilator
 V%: %.sv $(TESTDIR)/%_tb.cpp
@@ -27,8 +13,12 @@ V%: %.sv $(TESTDIR)/%_tb.cpp
 	make --quiet -C obj_dir/ -j -f $@.mk $@
 
 # xa65 (6502 assembler)
-%.out: $(ASMDIR)/%.s
+test_%.out: $(ASMDIR)/test_%.s
 	xa -o $@ $^
+
+.PHONY: run_test_*
+run_test_%: test.out
+	obj_dir/Vcpu $^
 
 .PHONY: clean
 clean:
