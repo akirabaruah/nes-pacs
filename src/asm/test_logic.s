@@ -1,0 +1,9 @@
+LDA #$03
+AND #$01
+STA $0200
+LDA #$0
+ORA #$01
+STA $0201
+LDA #$03
+EOR #$01
+STA $0202
