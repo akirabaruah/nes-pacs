@@ -244,6 +244,8 @@ module cpu (input clk,
       //$display("alu_instruction: %b", alu_instruction);
 	  //if (alu_instruction == ADC)
 
+		// if it is a right shift operation, alu_b needs to be zero
+
 	  case (alu_instruction)
 		AND: alu_mode <= ALU_AND;
 		ADC: begin alu_mode <= ALU_ADD; end
