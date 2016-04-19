@@ -1,6 +1,9 @@
+ADC #$01
+ADC #$02
 ADC #$03
-SBC #$10
-AND #$01
-AND #$01
-AND #$00
-AND #$00
+ADC #$04
+ADC #$05
+ADC #$06
+ADC #$07
+ADC #$08
+ADC #$09
