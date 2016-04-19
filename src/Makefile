@@ -13,6 +13,14 @@ run_test: test.out
 run_alu_test: test_alu.out
 	obj_dir/Vcpu $^
 
+.PHONY: run_adc_test
+run_adc_test: test_adc.out
+	obj_dir/Vcpu $^
+
+.PHONY: run_sbc_test
+run_sbc_test: test_sbc.out
+	obj_dir/Vcpu $^
+
 # Verilator
 V%: %.sv $(TESTDIR)/%_tb.cpp
 	verilator -Wall -Wno-lint --cc $< $(SUBMODULES) --exe $(word 2,$^)
