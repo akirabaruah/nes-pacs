@@ -147,12 +147,12 @@ module cpu (input clk,
    always_ff @ (posedge clk) begin
 
       case (state)
-        T0:
+        T0:begin
           casex (d_in)
-            8'bxxx_010_01: state <= IMM_T1;
+            8'bxxx_010_01: state <= IMM_T1; 
           endcase
-
-        IMM_T1: state <= T0;
+			 end
+        IMM_T1: state <= T0; 
 
         default: state <= T0;
       endcase
@@ -191,26 +191,20 @@ module cpu (input clk,
 	 * Bus logic
 	 */
 
-	always_comb @ (posedge clk) begin
-
-		case(state)
-			IMM_T1:	
+	always_comb begin
+	//	case(state)
+	//		IMM_T1:
 			casex(IR)
-            8'b000x_xxxx: db <= alu_out;
-            8'b001x_xxxx: db <= alu_out;
-            8'b010x_xxxx: db <= alu_out;
-            8'b011x_xxxx: db <= alu_out;
-            8'b100x_xxxx: db <= alu_out;
-            8'b101x_xxxx: db <= alu_out;
-            8'b110x_xxxx: db <= alu_out;
-            8'b111x_xxxx: db <= alu_out;
+            8'b000x_xxxx: db = alu_out;
+            8'b001x_xxxx: db = alu_out;
+            8'b010x_xxxx: db = alu_out;
+            8'b011x_xxxx: db = alu_out;
+            8'b100x_xxxx: db = alu_out;
+            8'b101x_xxxx: db = alu_out;
+            8'b110x_xxxx: db = alu_out;
+            8'b111x_xxxx: db = alu_out;
 			endcase
-		endcase
-
-		$display("db = %b", db);
-		$display("alu_out = %b", alu_out);
-		$display("acc = %b", A);
-		$display("state = %d", state);
+	//	endcase
 	end
 
 
@@ -242,7 +236,7 @@ module cpu (input clk,
     * Arithmetic Logic Unit (ALU)
     */
 
-   assign alu_instruction = {d_in[7:5], d_in[1:0]};
+   assign alu_instruction = {IR[7:5], IR[1:0]};
 
 
    always_ff @(posedge clk) begin
@@ -256,21 +250,22 @@ module cpu (input clk,
 		//ORA: alu_mode <= ALU_OR;
 		//EOR: alu_mode <= ALU_EOR;
 		//SBC: alu_mode <= ALU_SUB;
-		default: alu_mode <= 49;
+		default: alu_mode <= ALU_ADD;
 	  endcase
-	  //else
-	  //alu_mode <= ALU_AND;
-	  //$display("alu_mode: %d", alu_mode);
 
 		// TEMPORARY FIX
-		if (state == IMM_T1)
-		   alu_b <= d_in;
+	if (state == IMM_T1) begin
+	   alu_b <= d_in;
+	end
       alu_a <= A;
       //A <= alu_out;
       carry_in_temp <= P[0];
 
    $display("alu_a = %b", alu_a);
    $display("alu_b = %b", alu_b);
+	$display("db = %b", db);
+	$display("alu_out = %b", alu_out);
+	$display("acc = %b", A);
 
    end
 

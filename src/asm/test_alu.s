@@ -2,8 +2,3 @@ ADC #$01
 ADC #$02
 ADC #$03
 ADC #$04
-ADC #$05
-ADC #$06
-ADC #$07
-ADC #$08
-ADC #$09
