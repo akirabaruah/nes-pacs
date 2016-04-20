@@ -149,13 +149,31 @@ module cpu (input clk,
       case (state)
         T0:begin
           casex (d_in)
+			 	8'b100_011_01: state <= ABS_T1; // STA
             8'bxxx_010_01: state <= IMM_T1; 
           endcase
 			 end
         IMM_T1: state <= T0; 
 
+		  ABS_T1:begin
+						// get absolute address
+						state <= ABS_T2;
+		  			end
+			ABS_T2:begin
+						D_OUT <= A; // testing STA absolute 100_011_01
+						state <= T0;
+					end
+
         default: state <= T0;
       endcase
+
+   $display("alu_a = %b", alu_a);
+   $display("alu_b = %b", alu_b);
+	$display("db = %b", db);
+	$display("alu_out = %b", alu_out);
+	$display("acc = %b", A);
+	$display("din = %b", d_in);
+	$display("dout = %b", d_out);
 
 //      $display("state: T%.1d, IR: %x, bus_s: %x, A: %x", state, IR, bus_s, A);
 //      $display("IMM: %.1d, bbb: %.1d", IMM, bbb); 
@@ -217,11 +235,13 @@ module cpu (input clk,
    always_ff @ (posedge clk) begin
       casex (state)
         T0: begin
-           A <= db; 
-        end
+           		A <= db; 
+        		end
+			IMM_T1: begin
+				alu_b <= d_in;
+				end
       endcase
    end
-
 
    /*
     * Program Counter Logic
@@ -236,7 +256,7 @@ module cpu (input clk,
     * Arithmetic Logic Unit (ALU)
     */
 
-   assign alu_instruction = {IR[7:5], IR[1:0]};
+   assign alu_instruction = opcode; // do we need this?
 
 
    always_ff @(posedge clk) begin
@@ -249,25 +269,16 @@ module cpu (input clk,
 	  case (alu_instruction)
 		AND: alu_mode <= ALU_AND;
 		ADC: begin alu_mode <= ALU_ADD; end
-		//ORA: alu_mode <= ALU_OR;
-		//EOR: alu_mode <= ALU_EOR;
-		//SBC: alu_mode <= ALU_SUB;
+		ORA: alu_mode <= ALU_OR;
+		EOR: alu_mode <= ALU_EOR;
+		SBC: alu_mode <= ALU_SUB;
 		default: alu_mode <= ALU_ADD;
 	  endcase
 
-		// TEMPORARY FIX
-	if (state == IMM_T1) begin
-	   alu_b <= d_in;
-	end
-      alu_a <= A;
+	      alu_a <= A;
       //A <= alu_out;
       carry_in_temp <= P[0];
 
-   $display("alu_a = %b", alu_a);
-   $display("alu_b = %b", alu_b);
-	$display("db = %b", db);
-	$display("alu_out = %b", alu_out);
-	$display("acc = %b", A);
 
    end
 

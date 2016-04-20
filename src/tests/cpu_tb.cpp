@@ -40,7 +40,7 @@ int main(int argc, char **argv) {
         cpu->d_in = input;
 
         printf("%8d,%8.2x,%8.2x,%8.2x\n",
-               time, input, cpu->d_out, cpu->addr);
+               time, cpu->d_in, cpu->d_out, cpu->addr);
 
         tick(cpu);
 		time++;
