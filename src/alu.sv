@@ -17,6 +17,8 @@ module alu (input [7:0] alu_a,
 	assign   alu_out = tmp_out[7:0];
 	assign   overflow = alu_a[7] ^ alu_b[7] ^ tmp_out[7];
 	assign	carry_out = tmp_out[8];
+	assign	sign = tmp_out[7];
+	assign	zero = tmp_out == 0;
 
 	always_comb begin
 		case (mode)
