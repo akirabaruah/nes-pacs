@@ -17,7 +17,7 @@ test_%.out: $(ASMDIR)/test_%.s
 	xa -o $@ $^
 
 .PHONY: run_test_*
-run_test_%: test.out
+run_test_%: test_%.out
 	obj_dir/Vcpu $^
 
 .PHONY: clean
