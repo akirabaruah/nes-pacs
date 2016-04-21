@@ -149,7 +149,7 @@ module cpu (input clk,
       case (state)
         T0:begin
           casex (d_in)
-			 	8'b100_011_01: state <= ABS_T1; // STA
+			 	8'bxxx_011_01: state <= ABS_T1; // STA
             8'bxxx_010_01: state <= IMM_T1; 
           endcase
 			 end
@@ -213,19 +213,19 @@ module cpu (input clk,
 	 */
 
 	always_comb begin
-	//	case(state)
-	//		IMM_T1:
+		case(state)
+			IMM_T1:
 			casex(IR)
-            8'b000x_xxxx: db = alu_out;
-            8'b001x_xxxx: db = alu_out;
-            8'b010x_xxxx: db = alu_out;
-            8'b011x_xxxx: db = alu_out;
-            8'b100x_xxxx: db = alu_out;
-            8'b101x_xxxx: db = alu_out;
-            8'b110x_xxxx: db = alu_out;
-            8'b111x_xxxx: db = alu_out;
+            8'b000x_xxxx: db = alu_out; // ORA
+            8'b001x_xxxx: db = alu_out; // AND
+            8'b010x_xxxx: db = alu_out; // EOR
+            8'b011x_xxxx: db = alu_out; // ADC
+            8'b100x_xxxx: db = alu_out; // STA
+            8'b101x_xxxx: db = d_in; // LDA
+            8'b110x_xxxx: db = alu_out; // CMP
+            8'b111x_xxxx: db = alu_out; // SBC
 			endcase
-	//	endcase
+		endcase
 	end
 
 
@@ -238,10 +238,14 @@ module cpu (input clk,
    always_ff @ (posedge clk) begin
       casex (state)
         T0: begin
+				if (aaa == 3'b011) // ADC
            		A <= db; 
         		end
 			IMM_T1: begin
-				alu_b <= d_in;
+				if (aaa == 3'b011) // ADC
+					alu_b <= d_in;
+				else if (aaa == 3'b101) // LDA
+				   A <= d_in;	
 				end
       endcase
    end
@@ -271,15 +275,18 @@ module cpu (input clk,
 
 	  case (alu_instruction)
 		AND: alu_mode <= ALU_AND;
-		ADC: begin alu_mode <= ALU_ADD; end
+		ADC: alu_mode <= ALU_ADD; 
 		ORA: alu_mode <= ALU_OR;
 		EOR: alu_mode <= ALU_EOR;
 		SBC: alu_mode <= ALU_SUB;
 		default: alu_mode <= ALU_ADD;
 	  endcase
 
-	      alu_a <= A;
-      //A <= alu_out;
+		// At the moment the accumulator is writing to alu_a every cycle
+	   alu_a <= A;
+
+
+		// This variable is set to the value of the carry flag every cycle
       carry_in_temp <= P[0];
 
 

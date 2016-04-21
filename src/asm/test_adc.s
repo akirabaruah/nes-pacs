@@ -1,6 +1,4 @@
-LDA #$01
+LDA #$03
 ADC #$02
-STA $0200
 LDA #$fe
 ADC #$0f
-STA $0201
