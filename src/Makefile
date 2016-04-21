@@ -1,6 +1,6 @@
 TESTDIR=tests
-TESTS=	test_alu.out test_adc.out test_sbc.out \
-		test_cmp.out test_logic.out
+TESTS=	test_alu test_adc test_sbc \
+		test_cmp test_logic
 ASMDIR=asm
 SUBMODULES= alu.sv
 
@@ -13,13 +13,13 @@ V%: %.sv $(TESTDIR)/%_tb.cpp
 	make --quiet -C obj_dir/ -j -f $@.mk $@
 
 # xa65 (6502 assembler)
-test_%.out: $(ASMDIR)/test_%.s
+test_%: $(ASMDIR)/test_%.s
 	xa -o $@ $^
 
 .PHONY: run_test_*
-run_test_%: test_%.out
+run_test_%: test_%
 	obj_dir/Vcpu $^
 
 .PHONY: clean
 clean:
-	rm -rf obj_dir/ *.out
+	rm -rf obj_dir/ test_*
