@@ -160,7 +160,10 @@ module cpu (input clk,
 						state <= ABS_T2;
 		  			end
 			ABS_T2:begin
-						D_OUT <= A; // testing STA absolute 100_011_01
+						
+						if (opcode == STA) begin
+							D_OUT <= A; // testing STA absolute 100_011_01
+						end
 						state <= T0;
 					end
 
