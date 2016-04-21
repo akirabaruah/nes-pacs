@@ -90,9 +90,31 @@ module cpu (input clk,
    assign opcode = {aaa, cc};
 
    always_ff @ (posedge clk) begin
-      if (state == T0)
+      if (state == T0) begin
         IR <= d_in;
+	   end
    end
+
+   /*
+    * Control signals
+    */
+
+   /* Writer to DB */
+   parameter
+     DB_d_in = 3'd0,
+     DB_A = 3'd1,
+     DB_PCL = 3'd2,
+     DB_PCH = 3'd3,
+     DB_P = 3'd4;
+
+   /* Writer to SB */
+   parameter
+     SB_ALU = 3'd0,
+     SB_A = 3'd1,
+     SB_X = 3'd2,
+     SB_Y = 3'd3,
+     SB_SP = 3'd3;
+
 
 
    /*
@@ -153,7 +175,9 @@ module cpu (input clk,
             8'bxxx_010_01: state <= IMM_T1; 
           endcase
 			 end
-        IMM_T1: state <= T0; 
+        IMM_T1: begin 
+					state <= T0; 
+			end
 
 		  ABS_T1:begin
 						// get absolute address
@@ -182,27 +206,6 @@ module cpu (input clk,
 //      $display("IMM: %.1d, bbb: %.1d", IMM, bbb); 
    end
 
-
-   /*
-    * Control signals
-    */
-
-   /* Writer to DB */
-   parameter
-     DB_d_in = 3'd0,
-     DB_A = 3'd1,
-     DB_PCL = 3'd2,
-     DB_PCH = 3'd3,
-     DB_P = 3'd4;
-
-   /* Writer to SB */
-   parameter
-     SB_ALU = 3'd0,
-     SB_A = 3'd1,
-     SB_X = 3'd2,
-     SB_Y = 3'd3,
-     SB_SP = 3'd3;
-
    /* Buses */
    logic [7:0] db;
    logic [7:0] sb;
@@ -211,7 +214,7 @@ module cpu (input clk,
    /*
 	 * Bus logic
 	 */
-
+/*
 	always_comb begin
 		case(state)
 			IMM_T1:
@@ -227,7 +230,7 @@ module cpu (input clk,
 			endcase
 		endcase
 	end
-
+*/
 
 
 
@@ -235,21 +238,22 @@ module cpu (input clk,
     * Control logic
     */
 
-   always_ff @ (posedge clk) begin
-      casex (state)
-        T0: begin
-				if (aaa == 3'b011) // ADC
-           		A <= db; 
-        		end
-			IMM_T1: begin
-				if (aaa == 3'b011) // ADC
-					alu_b <= d_in;
-				else if (aaa == 3'b101) // LDA
-				   A <= d_in;	
-				end
-      endcase
-   end
-
+   always_comb begin
+			case (state)
+			IMM_T1:
+				if (aaa == 3'b011)
+					alu_b = d_in;
+				else if (aaa == 3'b101)
+					A = d_in;
+			endcase
+//				if (aaa == 3'b011) // This is T2, the final cycle of ADC
+//           		A <= alu_out; 
+//        		end
+//		  IMM_T1: begin
+//				if (aaa == 3'b011) // ADC
+//					A = alu_out;
+//				end
+end
    /*
     * Program Counter Logic
     */
@@ -288,6 +292,11 @@ module cpu (input clk,
 
 		// This variable is set to the value of the carry flag every cycle
       carry_in_temp <= P[0];
+	
+
+		if (state == IMM_T1)
+			if (aaa == 3'b011)
+				A = alu_out;
 
 
    end

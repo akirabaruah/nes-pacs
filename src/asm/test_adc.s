@@ -1,4 +1,4 @@
-LDA #$03
+LDA #$01
 ADC #$02
-LDA #$fe
-ADC #$0f
+ADC #$04
+ADC #$04
