@@ -1,7 +1,3 @@
 LDA #$03
 SBC #$01
-STA $0200
-LDA #$0
-SBC #$ff
-SBC #$01
-STA $0201
+ADC #$02

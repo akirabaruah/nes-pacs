@@ -1,0 +1,4 @@
+LDA #$0F
+AND #$F0
+ADC #$01
+ADC #$01

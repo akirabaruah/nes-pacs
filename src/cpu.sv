@@ -241,7 +241,9 @@ module cpu (input clk,
    always_comb begin
 			case (state)
 			IMM_T1:
-				if (aaa == 3'b011 || aaa == 3'b000)  // ADC, ORA
+				if (aaa == 3'b000 || aaa == 3'b001  
+				 || aaa == 3'b010 || aaa == 3'b011
+				 || aaa == 3'b111)   //  ORA, AND, EOR, ADC, SBC
 					alu_b = d_in;
 			endcase
 //				if (aaa == 3'b011) // This is T2, the final cycle of ADC
@@ -293,7 +295,9 @@ end
 	
 
 		if (state == IMM_T1)
-			if (aaa == 3'b011 || aaa == 3'b000) // ADC, ORA
+			if (aaa == 3'b000 || aaa == 3'b001  
+				 || aaa == 3'b010 || aaa == 3'b011
+				 || aaa == 3'b111)   //  ORA, AND, EOR, ADC, SBC
 				A = alu_out;
 			else if (aaa == 3'b101) // This operation was previously being performed in the comb logic above, which allowed the
 				A = d_in;            // accumulator to be set from LDA on cycle T1. Here it is loaded on cycle T2/T0 of the next
