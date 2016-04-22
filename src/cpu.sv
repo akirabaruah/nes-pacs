@@ -241,10 +241,8 @@ module cpu (input clk,
    always_comb begin
 			case (state)
 			IMM_T1:
-				if (aaa == 3'b011)
+				if (aaa == 3'b011 || aaa == 3'b000)  // ADC, ORA
 					alu_b = d_in;
-				else if (aaa == 3'b101)
-					A = d_in;
 			endcase
 //				if (aaa == 3'b011) // This is T2, the final cycle of ADC
 //           		A <= alu_out; 
@@ -295,9 +293,12 @@ end
 	
 
 		if (state == IMM_T1)
-			if (aaa == 3'b011)
+			if (aaa == 3'b011 || aaa == 3'b000) // ADC, ORA
 				A = alu_out;
-
+			else if (aaa == 3'b101) // This operation was previously being performed in the comb logic above, which allowed the
+				A = d_in;            // accumulator to be set from LDA on cycle T1. Here it is loaded on cycle T2/T0 of the next
+											// instruction. I moved it here because I thought registers should only be loaded on the
+											// clock. Thoughts?
 
    end
 
