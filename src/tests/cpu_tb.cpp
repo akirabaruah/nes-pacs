@@ -24,7 +24,12 @@ int main(int argc, char **argv) {
     uint8_t input;
 
     /* Read assembled binary into simulated memory */
-    FILE *binary = fopen(argv[1], "r");
+    char *filename = argv[1];
+    FILE *binary = fopen(filename, "r");
+    if (binary == NULL) {
+        perror(filename);
+        return 2;
+    }
     size_t len = fread(memory, 1, MEMSIZE, binary);
 
 	printf("%8s,%8s,%8s,%8s\n",
