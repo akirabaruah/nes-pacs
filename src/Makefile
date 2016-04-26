@@ -1,6 +1,6 @@
 TESTDIR=tests
 TESTS=	test_alu test_adc test_sbc test_and test_eor \
-		test_cmp test_logic
+		test_cmp test_logic test_absolute_addr
 ASMDIR=asm
 SUBMODULES= alu.sv
 
