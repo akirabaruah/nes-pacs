@@ -72,10 +72,12 @@ module cpu (input clk,
                SP;    // stack pointer
 
    assign d_out = D_OUT;
-   assign addr = {PCH, PCL};
 
 	logic temp_carry_out;
 	logic temp_carry_in;
+
+	// Set to true to pause the program counter
+	logic hold;
 
    /*
     * Instruction Fields
@@ -88,6 +90,7 @@ module cpu (input clk,
 
    assign {aaa, bbb, cc} = IR;
    assign opcode = {aaa, cc};
+	assign t1op = {d_in[7:5], d_in[1:0]};
 
    always_ff @ (posedge clk) begin
       if (state == T0) begin
@@ -164,32 +167,36 @@ module cpu (input clk,
          T0
          } state;
 
-   initial state = T0;
+   /*
+    * Program Counter Logic
+    */
+
+   always_ff @ (posedge clk) begin
+		if (!hold)
+      	{PCH, PCL} <= {PCH, PCL} + 1;
+   end
+
+
+   /*
+    * State Machine
+    */
+
+   initial 
+		state = T0;
 
    always_ff @ (posedge clk) begin
 
       case (state)
-        T0:begin
+        T0:
           casex (d_in)
-			 	8'bxxx_011_01: state <= ABS_T1; // STA
-            8'bxxx_010_01: state <= IMM_T1; 
+            8'bxxx_010_01: begin state <= IMM_T1; $display("in imm_t1"); end 
+			 	8'bxxx_011_01: state <= ABS_T1; 
           endcase
-			 end
-        IMM_T1: begin 
-					state <= T0; 
-			end
 
-		  ABS_T1:begin
-						// get absolute address
-						state <= ABS_T2;
-		  			end
-			ABS_T2:begin
-						
-						if (opcode == STA) begin
-							D_OUT <= A; // testing STA absolute 100_011_01
-						end
-						state <= T0;
-					end
+        IMM_T1: state <= T0; 
+
+		  ABS_T1: state <= ABS_T2; 
+		  ABS_T2: state <= T0;
 
         default: state <= T0;
       endcase
@@ -201,6 +208,11 @@ module cpu (input clk,
 	$display("acc = %b", A);
 	$display("din = %b", d_in);
 	$display("dout = %b", d_out);
+	$display("abl = %b", abl);
+	$display("abh = %b", abh);
+	$display("hold = %b", hold);
+	$display("addr = %b", addr);
+	$display("temp = %b", temp);
 
 //      $display("state: T%.1d, IR: %x, bus_s: %x, A: %x", state, IR, bus_s, A);
 //      $display("IMM: %.1d, bbb: %.1d", IMM, bbb); 
@@ -209,6 +221,9 @@ module cpu (input clk,
    /* Buses */
    logic [7:0] db;
    logic [7:0] sb;
+	logic [7:0] abl;  // address bus low
+	logic [7:0] abh;  // address bus high 
+
 
 
    /*
@@ -224,7 +239,7 @@ module cpu (input clk,
             8'b010x_xxxx: db = alu_out; // EOR
             8'b011x_xxxx: db = alu_out; // ADC
             8'b100x_xxxx: db = alu_out; // STA
-            8'b101x_xxxx: db = d_in; // LDA
+            8'b101x_xxxx: db = d_in; 	 // LDA
             8'b110x_xxxx: db = alu_out; // CMP
             8'b111x_xxxx: db = alu_out; // SBC
 			endcase
@@ -232,20 +247,39 @@ module cpu (input clk,
 	end
 */
 
-
-
    /*
     * Control logic
     */
 
+	// This is for testing absolute addressing
+	logic [15:0] temp;
+
    always_comb begin
 			case (state)
-			IMM_T1:
-				if (aaa == 3'b000 || aaa == 3'b001  
-				 || aaa == 3'b010 || aaa == 3'b011
-				 || aaa == 3'b111)   //  ORA, AND, EOR, ADC, SBC
-					alu_b = d_in;
+				IMM_T1:
+					if (aaa == 3'b000 || aaa == 3'b001  
+					 || aaa == 3'b010 || aaa == 3'b011
+					 || aaa == 3'b111)   //  ORA, AND, EOR, ADC, SBC
+						alu_b = d_in;
+				ABS_T1:
+					abl = d_in;
+				ABS_T2:
+					abh = d_in;
 			endcase
+
+	
+		// Set the address to fetch proper data	
+		if (state == ABS_T2) begin
+			$display("in abs_t2");
+			hold = 1;
+			addr = {abh, abl};
+		end else begin
+			hold = 0;
+			addr = {PCH, PCL};
+		end
+
+
+		end
 //				if (aaa == 3'b011) // This is T2, the final cycle of ADC
 //           		A <= alu_out; 
 //        		end
@@ -253,21 +287,12 @@ module cpu (input clk,
 //				if (aaa == 3'b011) // ADC
 //					A = alu_out;
 //				end
-end
-   /*
-    * Program Counter Logic
-    */
-
-   always_ff @ (posedge clk) begin
-      {PCH, PCL} <= {PCH, PCL} + 1;
-   end
-
 
    /*
     * Arithmetic Logic Unit (ALU)
     */
 
-   assign alu_instruction = opcode; // do we need this?
+//   assign alu_instruction = opcode; // do we need this?
 
 
    always_ff @(posedge clk) begin
@@ -277,14 +302,27 @@ end
 
 		// if it is a right shift operation, alu_b needs to be zero
 
-	  case (alu_instruction)
-		AND: alu_mode <= ALU_AND;
-		ADC: alu_mode <= ALU_ADD; 
-		ORA: alu_mode <= ALU_OR;
-		EOR: alu_mode <= ALU_EOR;
-		SBC: alu_mode <= ALU_SUB;
-		default: alu_mode <= ALU_ADD;
-	  endcase
+//	  $display("alu instruction: %b", alu_instruction);
+	  if (state == T0) begin
+		  case (t1op)
+			AND: alu_mode <= ALU_AND;
+			ADC: alu_mode <= ALU_ADD; 
+			ORA: alu_mode <= ALU_OR;
+			EOR: alu_mode <= ALU_EOR;
+			SBC: alu_mode <= ALU_SUB;
+			default: alu_mode <= ALU_SUB;
+		  endcase
+		end
+	  else begin
+		  case (opcode)
+			AND: alu_mode <= ALU_AND;
+			ADC: alu_mode <= ALU_ADD; 
+			ORA: alu_mode <= ALU_OR;
+			EOR: alu_mode <= ALU_EOR;
+			SBC: alu_mode <= ALU_SUB;
+			default: alu_mode <= ALU_SUB;
+		  endcase
+end
 
 		// At the moment the accumulator is writing to alu_a every cycle
 	   alu_a <= A;
@@ -298,11 +336,14 @@ end
 			if (aaa == 3'b000 || aaa == 3'b001  
 				 || aaa == 3'b010 || aaa == 3'b011
 				 || aaa == 3'b111)   //  ORA, AND, EOR, ADC, SBC
-				A = alu_out;
+				A <= alu_out;
 			else if (aaa == 3'b101) // This operation was previously being performed in the comb logic above, which allowed the
-				A = d_in;            // accumulator to be set from LDA on cycle T1. Here it is loaded on cycle T2/T0 of the next
+				A <= d_in;            // accumulator to be set from LDA on cycle T1. Here it is loaded on cycle T2/T0 of the next
 											// instruction. I moved it here because I thought registers should only be loaded on the
 											// clock. Thoughts?
+		else if (state == ABS_T2)
+				A <= d_in;
+
 
    end
 
