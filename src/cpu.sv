@@ -201,8 +201,9 @@ module cpu (input clk,
       case (state)
         T0:
           casex (d_in)
-            8'bxxx_010_01: begin state <= IMM_T1;  end 
-			 	8'bxxx_011_01: begin state <= ABS_T1;  end 
+            8'bxxx_010_01: state <= IMM_T1;
+			 	8'bxxx_011_01: state <= ABS_T1;
+				8'bxxx_001_01: state <= ZP_T1;
           endcase
 
         IMM_T1: state <= T0; 
@@ -210,6 +211,9 @@ module cpu (input clk,
 		  ABS_T1: state <= ABS_T2; 
 		  ABS_T2: state <= ABS_T3;
 		  ABS_T3: state <= T0;
+
+		  ZP_T1:  state <= ZP_T2;
+		  ZP_T2:  state <= T0;
 
         default: state <= T0;
       endcase
@@ -262,16 +266,15 @@ module cpu (input clk,
 
    always_comb begin
 			case (state)
-				T0: write = 0;
+				T0: write = 0; // Should this always be set to 0 on T0??
 				IMM_T1:
 					if (aaa == 3'b000 || aaa == 3'b001  
 					 || aaa == 3'b010 || aaa == 3'b011
 					 || aaa == 3'b111)   //  ORA, AND, EOR, ADC, SBC
 						alu_b = d_in;
-				ABS_T1:
-					abl = d_in;
-				ABS_T2:
-					begin hold = 1; abh = d_in; end
+				
+				ABS_T1: abl = d_in;
+				ABS_T2: begin hold = 1; abh = d_in; end
 				ABS_T3:
 					begin hold = 0; addr = {abh, abl}; 
 						if (aaa == 3'b000 || aaa == 3'b001  
@@ -282,10 +285,23 @@ module cpu (input clk,
 							d_out = A;
 							write = 1;
 						end
-				end
+					end
+
+				ZP_T1: begin hold = 1; abl = d_in; abh = 0; end 
+				ZP_T2: 
+					begin hold = 0; addr = {abh, abl};
+						if (aaa == 3'b000 || aaa == 3'b001  
+						 || aaa == 3'b010 || aaa == 3'b011
+						 || aaa == 3'b111)   //  ORA, AND, EOR, ADC, SBC
+							alu_b = d_in;
+						else if (aaa == 3'b100) begin // STA
+							d_out = A;
+							write = 1;
+						end
+					end
 			endcase
 			
-		if (state != ABS_T3)
+		if (state != ABS_T3 && state != ZP_T2)
 			addr = {PCH, PCL};
 
 		end
@@ -358,6 +374,16 @@ end
 			else if (aaa == 3'b101) // LDA
 				A <= d_in;
    	end
+		
+		else if (state == ZP_T2) begin
+			if	(aaa == 3'b000 || aaa == 3'b001  
+				 || aaa == 3'b010 || aaa == 3'b011
+				 || aaa == 3'b111)   //  ORA, AND, EOR, ADC, SBC
+				A <= alu_out;
+			else if (aaa == 3'b101) // LDA
+				A <= d_in;
+   	end
+
 	end
    // TODO: MISSING!!!!!!
    // alu_b needs to get data from other places

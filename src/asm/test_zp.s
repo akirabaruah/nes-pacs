@@ -1,0 +1,4 @@
+LDA #$07
+STA $00aa
+LDA #$01
+LDA $00aa
