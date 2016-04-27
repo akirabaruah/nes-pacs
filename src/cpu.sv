@@ -181,22 +181,25 @@ module cpu (input clk,
     * State Machine
     */
 
-   initial 
+   initial begin 
 		state = T0;
+		hold = 0;
+end
 
    always_ff @ (posedge clk) begin
 
       case (state)
         T0:
           casex (d_in)
-            8'bxxx_010_01: begin state <= IMM_T1; $display("in imm_t1"); end 
-			 	8'bxxx_011_01: state <= ABS_T1; 
+            8'bxxx_010_01: begin state <= IMM_T1;  end 
+			 	8'bxxx_011_01: begin state <= ABS_T1;  end 
           endcase
 
         IMM_T1: state <= T0; 
 
 		  ABS_T1: state <= ABS_T2; 
-		  ABS_T2: state <= T0;
+		  ABS_T2: state <= ABS_T3;
+		  ABS_T3: state <= T0;
 
         default: state <= T0;
       endcase
@@ -264,29 +267,22 @@ module cpu (input clk,
 				ABS_T1:
 					abl = d_in;
 				ABS_T2:
-					abh = d_in;
+					begin hold = 1; abh = d_in; end
+				ABS_T3:
+					begin hold = 0; addr = {abh, abl}; 
+						if (aaa == 3'b000 || aaa == 3'b001  
+						 || aaa == 3'b010 || aaa == 3'b011
+						 || aaa == 3'b111)   //  ORA, AND, EOR, ADC, SBC
+							alu_b = d_in;
+				end
 			endcase
-
-	
-		// Set the address to fetch proper data	
-		if (state == ABS_T2) begin
-			$display("in abs_t2");
-			hold = 1;
-			addr = {abh, abl};
-		end else begin
-			hold = 0;
+			
+		if (state != ABS_T3)
 			addr = {PCH, PCL};
+
 		end
 
 
-		end
-//				if (aaa == 3'b011) // This is T2, the final cycle of ADC
-//           		A <= alu_out; 
-//        		end
-//		  IMM_T1: begin
-//				if (aaa == 3'b011) // ADC
-//					A = alu_out;
-//				end
 
    /*
     * Arithmetic Logic Unit (ALU)
@@ -332,21 +328,24 @@ end
       carry_in_temp <= P[0];
 	
 
-		if (state == IMM_T1)
+		if (state == IMM_T1) begin
 			if (aaa == 3'b000 || aaa == 3'b001  
 				 || aaa == 3'b010 || aaa == 3'b011
 				 || aaa == 3'b111)   //  ORA, AND, EOR, ADC, SBC
 				A <= alu_out;
 			else if (aaa == 3'b101) // This operation was previously being performed in the comb logic above, which allowed the
-				A <= d_in;            // accumulator to be set from LDA on cycle T1. Here it is loaded on cycle T2/T0 of the next
-											// instruction. I moved it here because I thought registers should only be loaded on the
+				A <= d_in;           // accumulator to be set from LDA on cycle T1. Here it is loaded on cycle T2/T0 of the next
+      end								// instruction. I moved it here because I thought registers should only be loaded on the
 											// clock. Thoughts?
-		else if (state == ABS_T2)
+		else if (state == ABS_T3) begin
+			if	(aaa == 3'b000 || aaa == 3'b001  
+				 || aaa == 3'b010 || aaa == 3'b011
+				 || aaa == 3'b111)   //  ORA, AND, EOR, ADC, SBC
+				A <= alu_out;
+			else if (aaa == 3'b101) // LDA
 				A <= d_in;
-
-
    end
-
+end
    // TODO: MISSING!!!!!!
    // alu_b needs to get data from other places
    // like X, Y, PCL/PCH????
