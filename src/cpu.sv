@@ -51,7 +51,8 @@ module cpu (input clk,
    			input rst,
    			input [7:0] d_in,
    			output [7:0] d_out,
-   			output [15:0] addr);
+   			output [15:0] addr,
+				output write);
 
    /*
     * Registers
@@ -78,6 +79,14 @@ module cpu (input clk,
 
 	// Set to true to pause the program counter
 	logic hold;
+
+   /* Buses */
+   logic [7:0] db;
+   logic [7:0] sb;
+	logic [7:0] abl;  // address bus low
+	logic [7:0] abh;  // address bus high 
+
+
 
    /*
     * Instruction Fields
@@ -184,7 +193,8 @@ module cpu (input clk,
    initial begin 
 		state = T0;
 		hold = 0;
-end
+		write = 0;
+	end
 
    always_ff @ (posedge clk) begin
 
@@ -216,18 +226,11 @@ end
 	$display("hold = %b", hold);
 	$display("addr = %b", addr);
 	$display("temp = %b", temp);
+	$display("write = %b", write);
 
 //      $display("state: T%.1d, IR: %x, bus_s: %x, A: %x", state, IR, bus_s, A);
 //      $display("IMM: %.1d, bbb: %.1d", IMM, bbb); 
    end
-
-   /* Buses */
-   logic [7:0] db;
-   logic [7:0] sb;
-	logic [7:0] abl;  // address bus low
-	logic [7:0] abh;  // address bus high 
-
-
 
    /*
 	 * Bus logic
@@ -259,6 +262,7 @@ end
 
    always_comb begin
 			case (state)
+				T0: write = 0;
 				IMM_T1:
 					if (aaa == 3'b000 || aaa == 3'b001  
 					 || aaa == 3'b010 || aaa == 3'b011
@@ -274,6 +278,10 @@ end
 						 || aaa == 3'b010 || aaa == 3'b011
 						 || aaa == 3'b111)   //  ORA, AND, EOR, ADC, SBC
 							alu_b = d_in;
+						else if (aaa == 3'b100) begin // STA
+							d_out = A;
+							write = 1;
+						end
 				end
 			endcase
 			
@@ -333,10 +341,15 @@ end
 				 || aaa == 3'b010 || aaa == 3'b011
 				 || aaa == 3'b111)   //  ORA, AND, EOR, ADC, SBC
 				A <= alu_out;
-			else if (aaa == 3'b101) // This operation was previously being performed in the comb logic above, which allowed the
-				A <= d_in;           // accumulator to be set from LDA on cycle T1. Here it is loaded on cycle T2/T0 of the next
-      end								// instruction. I moved it here because I thought registers should only be loaded on the
-											// clock. Thoughts?
+
+			// This operation was previously being performed in the comb logic above, which allowed the
+			// accumulator to be set from LDA on cycle T1. Here it is loaded on cycle T2/T0 of the next
+			// instruction. I moved it here because I thought registers should only be loaded on the
+			// clock. Thoughts?
+			else if (aaa == 3'b101) // LDA 
+				A <= d_in;           
+      end								
+									
 		else if (state == ABS_T3) begin
 			if	(aaa == 3'b000 || aaa == 3'b001  
 				 || aaa == 3'b010 || aaa == 3'b011
@@ -344,8 +357,8 @@ end
 				A <= alu_out;
 			else if (aaa == 3'b101) // LDA
 				A <= d_in;
-   end
-end
+   	end
+	end
    // TODO: MISSING!!!!!!
    // alu_b needs to get data from other places
    // like X, Y, PCL/PCH????

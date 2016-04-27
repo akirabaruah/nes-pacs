@@ -44,6 +44,8 @@ int main(int argc, char **argv) {
 
 		if (addr == (len+1)) { break; }
 
+		if (cpu->write) { memory[cpu->addr] = cpu->d_out; }
+
 		input = memory[addr];
 		cpu->d_in = input; 
 
