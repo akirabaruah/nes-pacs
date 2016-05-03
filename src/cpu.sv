@@ -206,6 +206,7 @@ module cpu (input clk,
             8'bxxx_010_01: state <= IMM_T1;
 			 	8'bxxx_011_01: state <= ABS_T1;
 				8'bxxx_001_01: state <= ZP_T1;
+				8'bxxx_111_01: state <= ABSX_T1;
 
 				8'bxxx_000_10: state <= IMM_T1; 
 			
@@ -220,6 +221,11 @@ module cpu (input clk,
 
 		  ZP_T1:  state <= ZP_T2;
 		  ZP_T2:  state <= T0;
+
+		  ABSX_T1: state <= ABSX_T2;
+		  ABSX_T2: state <= ABSX_T3;
+		  ABSX_T3: state <= ABSX_T4;
+		  ABSX_T4: state <= T0;
 
         default:state <= T0;
       endcase
@@ -265,6 +271,105 @@ module cpu (input clk,
     * Control logic
     */
 
+	// Write logic
+	always_comb begin
+		case (state)
+			ABS_T3: begin 
+					if (aaa == 3'b100)
+						write = 1;
+					else
+						write = 0;
+				end
+
+			ZP_T2:begin 
+					if (aaa == 3'b100)
+						write = 1;
+					else
+						write = 0;
+				end
+			default: write = 0;
+		endcase
+	end
+
+
+	// alu_b and sb logic
+	always_comb begin
+		case (state)
+			IMM_T1: begin
+			if (aaa == 3'b000 || aaa == 3'b001  
+					|| aaa == 3'b010 || aaa == 3'b011
+					|| aaa == 3'b111) begin //  ORA, AND, EOR, ADC, SBC
+						alu_b = d_in;
+						sb = SB_A;
+			end else begin
+						alu_b = 0;
+						sb = SB_A;
+			end
+			end
+
+			ABS_T3: begin
+			if (aaa == 3'b000 || aaa == 3'b001  
+					|| aaa == 3'b010 || aaa == 3'b011
+					|| aaa == 3'b111) begin //  ORA, AND, EOR, ADC, SBC
+						alu_b = d_in;
+						sb = SB_A;
+			end else begin
+						alu_b = 0;
+						sb = SB_A;
+			end
+			end
+
+			ZP_T2: begin
+			if (aaa == 3'b000 || aaa == 3'b001  
+					|| aaa == 3'b010 || aaa == 3'b011
+					|| aaa == 3'b111) begin //  ORA, AND, EOR, ADC, SBC
+						alu_b = d_in;
+						sb = SB_A;
+			end else begin
+						alu_b = 0;
+						sb = SB_A;
+			end
+			end
+
+			default: begin alu_b = 0; sb = 0; end
+		endcase
+	end
+
+
+	always_comb begin
+		case (state)
+			ABS_T3: begin
+					if (aaa == 3'b100)
+						d_out = A;	
+					else
+						d_out = 0;
+				end
+			ZP_T2: begin
+					if (aaa == 3'b100)
+						d_out = A;	
+					else
+						d_out = 0;
+				end
+			
+			default: d_out = 0;
+
+		endcase
+	end
+
+ 	always_comb begin
+		if (state != ABS_T3 && state != ZP_T2)
+			addr = {PCH, PCL};
+	end
+
+
+
+
+
+
+
+
+/*
+
    always_comb begin
 			case (state)
 				T0: write = 0; // Should this always be set to 0 on T0??
@@ -309,20 +414,25 @@ module cpu (input clk,
 							write = 1;
 						end
 					end
+
+				ABSX_T1: alu_b = d_in; // Store the base address low in alu_b to be added to X register
+				ABSX_T2: alu_b = d_in;
+				
+				
 			endcase
 			
 		if (state != ABS_T3 && state != ZP_T2)
 			addr = {PCH, PCL};
 
 		end
-
+*/
 
 
    /*
     * Arithmetic Logic Unit (ALU)
     */
 
-//   assign alu_instruction = opcode; // do we need this?
+	// assign alu_instruction = opcode; // do we need this?
 
 
    always_ff @(posedge clk) begin
@@ -348,9 +458,9 @@ module cpu (input clk,
 			SBC: alu_mode <= ALU_SUB;
 			default: alu_mode <= ALU_SUB;
 		  endcase
-end
+	end
 
-		// At the moment the accumulator is writing to alu_a every cycle
+		// alu_a reads proper value from the sb
 	   case (sb)
 			SB_A:	alu_a <= A;
 			SB_X: alu_a <= X;
@@ -360,50 +470,53 @@ end
       carry_in_temp <= P[0];
 	
 
-		if (state == IMM_T1) begin
-			case (cc)
-				2'b01: begin
-					if (aaa == 3'b000 || aaa == 3'b001  
+
+
+		case (state)
+			IMM_T1: 
+				begin
+					case (cc)
+						2'b01: begin
+							if (aaa == 3'b000 || aaa == 3'b001  
+								 || aaa == 3'b010 || aaa == 3'b011
+								 || aaa == 3'b111)   //  ORA, AND, EOR, ADC, SBC
+								A <= alu_out;
+
+							// This operation was previously being performed in the comb logic above, which allowed the
+							// accumulator to be set from LDA on cycle T1. Here it is loaded on cycle T2/T0 of the next
+							// instruction. I moved it here because I thought registers should only be loaded on the
+							// clock. Thoughts?
+							else if (aaa == 3'b101) // LDA 
+								A <= d_in;           
+							end
+						2'b10: begin 
+							if (aaa == 3'b101) // LDX
+								X <= d_in;
+							end
+					endcase
+				end								
+									
+			ABS_T3: 
+				begin
+					if	(aaa == 3'b000 || aaa == 3'b001  
 						 || aaa == 3'b010 || aaa == 3'b011
 						 || aaa == 3'b111)   //  ORA, AND, EOR, ADC, SBC
 						A <= alu_out;
-
-					// This operation was previously being performed in the comb logic above, which allowed the
-					// accumulator to be set from LDA on cycle T1. Here it is loaded on cycle T2/T0 of the next
-					// instruction. I moved it here because I thought registers should only be loaded on the
-					// clock. Thoughts?
-					else if (aaa == 3'b101) // LDA 
-						A <= d_in;           
-					end
-				2'b10: begin 
-					if (aaa == 3'b101) // LDX
-						X <= d_in;
-					end
-			endcase
-      end								
-									
-		else if (state == ABS_T3) begin
-			if	(aaa == 3'b000 || aaa == 3'b001  
-				 || aaa == 3'b010 || aaa == 3'b011
-				 || aaa == 3'b111)   //  ORA, AND, EOR, ADC, SBC
-				A <= alu_out;
-			else if (aaa == 3'b101) // LDA
-				A <= d_in;
-   	end
+					else if (aaa == 3'b101) // LDA
+						A <= d_in;
+				end
 		
-		else if (state == ZP_T2) begin
-			if	(aaa == 3'b000 || aaa == 3'b001  
-				 || aaa == 3'b010 || aaa == 3'b011
-				 || aaa == 3'b111)   //  ORA, AND, EOR, ADC, SBC
-				A <= alu_out;
-			else if (aaa == 3'b101) // LDA
-				A <= d_in;
-   	end
-
+			ZP_T2: 
+				begin
+					if	(aaa == 3'b000 || aaa == 3'b001  
+						 || aaa == 3'b010 || aaa == 3'b011
+						 || aaa == 3'b111)   //  ORA, AND, EOR, ADC, SBC
+						A <= alu_out;
+					else if (aaa == 3'b101) // LDA
+						A <= d_in;
+				end
+		endcase
 	end
-   // TODO: MISSING!!!!!!
-   // alu_b needs to get data from other places
-   // like X, Y, PCL/PCH????
 
    logic [7:0] alu_out;
    alu ALU(
