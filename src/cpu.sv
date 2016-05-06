@@ -70,7 +70,9 @@ module cpu (input clk,
                P,     // processor status
                PCH,   // program counter high
                PCL,   // program counter low
-               SP;    // stack pointer
+               SP,    // stack pointer
+					ABL,
+					ABH;
 
    assign d_out = D_OUT;
 
@@ -204,7 +206,7 @@ module cpu (input clk,
         T0:
           casex (d_in)
             8'bxxx_010_01: state <= IMM_T1;
-			 	8'bxxx_011_01: state <= ABS_T1;
+			 	8'bxxx_011_01: begin state <= ABS_T1; end
 				8'bxxx_001_01: state <= ZP_T1;
 				8'bxxx_111_01: state <= ABSX_T1;
 
@@ -215,11 +217,11 @@ module cpu (input clk,
 
         IMM_T1: state <= T0; 
 
-		  ABS_T1: state <= ABS_T2;
+		  ABS_T1: begin state <= ABS_T2; ABL <= d_in; end
 		  ABS_T2: state <= ABS_T3;
 		  ABS_T3: state <= T0;
 
-		  ZP_T1:  state <= ZP_T2;
+		  ZP_T1:  begin state <= ZP_T2; ABL <= d_in; end
 		  ZP_T2:  state <= T0;
 
 		  ABSX_T1: state <= ABSX_T2;
@@ -243,6 +245,7 @@ module cpu (input clk,
 	$display("hold = %b", hold);
 	$display("addr = %b", addr);
 	$display("write = %b", write);
+	$display("ABL register = %b", ABL);
 
    end
 
@@ -359,15 +362,47 @@ module cpu (input clk,
  	always_comb begin
 		if (state != ABS_T3 && state != ZP_T2)
 			addr = {PCH, PCL};
+		else if (state == ABS_T3 || state == ZP_T2)
+			addr = {abh, ABL};
+		else
+			addr = 0;
+	end
+/*
+	// abl logic
+	always_comb begin
+		case (state)
+
+			ABS_T1: abl = d_in;
+
+			ZP_T2: abl = d_in;
+			default: abl = 0;
+		endcase
+	end
+*/
+
+	// abh logic
+	always_comb begin
+		case (state)
+
+			ABS_T2: abh = d_in;
+
+			ZP_T2:  abh = 0;
+		   default: abh = abh;	
+		endcase	
 	end
 
+	// hold logic
+	always_comb begin
+		case (state)
+			ABS_T2: hold = 1;
+			ABS_T3: hold = 0;
+	
+			ZP_T1: hold = 1;
+			ZP_T2: hold = 0;
 
-
-
-
-
-
-
+			default: hold = 0;
+		endcase
+	end
 /*
 
    always_comb begin
