@@ -19,7 +19,7 @@ int main(int argc, char **argv) {
 
     Vcpu *cpu = new Vcpu;
     char memory[MEMSIZE];
-	 memset((char *)memory, 9, sizeof(memory));
+    memset((char *)memory, 9, sizeof(memory));
     int time = 0;
     uint16_t addr = 0;
     uint8_t input;
@@ -32,7 +32,6 @@ int main(int argc, char **argv) {
         return 2;
     }
     size_t len = fread(memory, 1, MEMSIZE, binary);
-	 printf("len = %zd\n", len);
 
 	printf("%8s,%8s,%8s,%8s\n",
 		   "time", "in", "out", "addr");
@@ -47,11 +46,11 @@ int main(int argc, char **argv) {
 		if (cpu->write) { memory[cpu->addr] = cpu->d_out; }
 
 		input = memory[addr];
-		cpu->d_in = input; 
+		cpu->d_in = input;
 
 
 		printf("%8d,%8.2x,%8.2x,%8.2x\n",
-				time, cpu->d_in, cpu->d_out, cpu->addr);
+               time, cpu->d_in, cpu->d_out, cpu->addr);
 
 		tick(cpu);
 		time++;
