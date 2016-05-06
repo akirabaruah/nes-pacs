@@ -11,7 +11,6 @@ module alu (input [7:0] alu_a,
 				output sign);
    
 	logic [8:0] tmp_out; //9 bit add for easy overflow/carry checks
-	logic carry_in_temp = carry_in; // maybe need this for 2's complement sub	
 		
 	// for right shift, alu_b will be zero
 	assign   alu_out = tmp_out[7:0];
@@ -22,8 +21,8 @@ module alu (input [7:0] alu_a,
 
 	always_comb begin
 		case (mode)
-			ALU_ADD: begin tmp_out = alu_a + alu_b + carry_in_temp; $display("alu_add"); end
-			ALU_SUB: begin tmp_out = alu_a - alu_b + carry_in_temp; $display("alu_sub"); end
+			ALU_ADD: begin tmp_out = alu_a + alu_b + carry_in; $display("alu_add"); end
+			ALU_SUB: begin tmp_out = alu_a - alu_b + carry_in; $display("alu_sub"); end
 			ALU_AND: begin tmp_out = alu_a & alu_b; $display("alu_and"); end
 	 		ALU_OR : tmp_out = alu_a | alu_b;
 	 		ALU_EOR: tmp_out = alu_a ^ alu_b;

@@ -74,7 +74,7 @@ module cpu (input clk,
 					ABL,
 					ABH;
 
-   assign d_out = D_OUT;
+  // assign d_out = D_OUT;
 
 	logic temp_carry_out;
 	logic temp_carry_in;
@@ -387,7 +387,7 @@ module cpu (input clk,
 			ABS_T2: abh = d_in;
 
 			ZP_T2:  abh = 0;
-		   default: abh = abh;	
+		   default: abh = 0;	
 		endcase	
 	end
 
