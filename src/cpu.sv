@@ -1,3 +1,5 @@
+
+
 /*
  * Opcodes {aaa, cc}
  */
@@ -91,48 +93,6 @@ module cpu (input clk,
 	logic [7:0] abh;  // address bus high 
 
 
-
-   /*
-    * Instruction Fields
-    */
-
-   logic [2:0] aaa;
-   logic [2:0] bbb;
-   logic [1:0] cc;
-   logic [4:0] opcode;
-
-   assign {aaa, bbb, cc} = IR;
-   assign opcode = {aaa, cc};
-	assign t1op = {d_in[7:5], d_in[1:0]};
-
-   always_ff @ (posedge clk) begin
-      if (state == T0) begin
-        IR <= d_in;
-	   end
-   end
-
-   /*
-    * Control signals
-    */
-
-   /* Writer to DB */
-   parameter
-     DB_d_in = 3'd0,
-     DB_A = 3'd1,
-     DB_PCL = 3'd2,
-     DB_PCH = 3'd3,
-     DB_P = 3'd4;
-
-   /* Writer to SB */
-   parameter
-     SB_ALU = 3'd0,
-     SB_A = 3'd1,
-     SB_X = 3'd2,
-     SB_Y = 3'd3,
-     SB_SP = 3'd3;
-
-
-
    /*
     * Controller FSM
     */
@@ -180,6 +140,48 @@ module cpu (input clk,
          T0
          } state;
 
+
+
+   /*
+    * Instruction Fields
+    */
+
+   logic [2:0] aaa;
+   logic [2:0] bbb;
+   logic [1:0] cc;
+   logic [4:0] opcode;
+
+   assign {aaa, bbb, cc} = IR;
+   assign opcode = {aaa, cc};
+	assign t1op = {d_in[7:5], d_in[1:0]};
+
+   always_ff @ (posedge clk) begin
+      if (state == T0) begin
+        IR <= d_in;
+	   end
+   end
+
+   /*
+    * Control signals
+    */
+
+   /* Writer to DB */
+   parameter
+     DB_d_in = 3'd0,
+     DB_A = 3'd1,
+     DB_PCL = 3'd2,
+     DB_PCH = 3'd3,
+     DB_P = 3'd4;
+
+   /* Writer to SB */
+   parameter
+     SB_ALU = 3'd0,
+     SB_A = 3'd1,
+     SB_X = 3'd2,
+     SB_Y = 3'd3,
+     SB_SP = 3'd3;
+
+
    /*
     * Program Counter Logic
     */
@@ -203,10 +205,10 @@ module cpu (input clk,
    always_ff @ (posedge clk) begin
 
       case (state)
-        T0:
+        T0: begin $display("in T0");
           casex (d_in)
             8'bxxx_010_01: state <= IMM_T1;
-			 	8'bxxx_011_01: begin state <= ABS_T1; end
+			 	8'bxxx_011_01: state <= ABS_T1;
 				8'bxxx_001_01: state <= ZP_T1;
 				8'bxxx_111_01: state <= ABSX_T1;
 
@@ -214,8 +216,8 @@ module cpu (input clk,
 			
 				default: $display("IN T0 DEFAULT");
           endcase
-
-        IMM_T1: state <= T0; 
+			end
+        IMM_T1: begin state <= T0; $display("in imm_t1"); end 
 
 		  ABS_T1: begin state <= ABS_T2; ABL <= d_in; end
 		  ABS_T2: state <= ABS_T3;
@@ -232,10 +234,10 @@ module cpu (input clk,
         default:state <= T0;
       endcase
 
-   $display("alu_a = %b", alu_a);
-   $display("alu_b = %b", alu_b);
+//   $display("alu_a = %b", alu_a);
+//   $display("alu_b = %b", alu_b);
 	$display("db = %b", db);
-	$display("alu_out = %b", alu_out);
+//	$display("alu_out = %b", alu_out);
 	$display("acc = %b", A);
 	$display("X = %b", X);
 	$display("din = %b", d_in);
@@ -298,7 +300,7 @@ module cpu (input clk,
 	// alu_b and sb logic
 	always_comb begin
 		case (state)
-			IMM_T1: begin
+			IMM_T1: begin $display("not in default for alu_b");
 			if (aaa == 3'b000 || aaa == 3'b001  
 					|| aaa == 3'b010 || aaa == 3'b011
 					|| aaa == 3'b111) begin //  ORA, AND, EOR, ADC, SBC
@@ -310,7 +312,7 @@ module cpu (input clk,
 			end
 			end
 
-			ABS_T3: begin
+			ABS_T3: begin $display("not in default for alu_b");
 			if (aaa == 3'b000 || aaa == 3'b001  
 					|| aaa == 3'b010 || aaa == 3'b011
 					|| aaa == 3'b111) begin //  ORA, AND, EOR, ADC, SBC
@@ -322,7 +324,7 @@ module cpu (input clk,
 			end
 			end
 
-			ZP_T2: begin
+			ZP_T2: begin $display("not in default for alu_b");
 			if (aaa == 3'b000 || aaa == 3'b001  
 					|| aaa == 3'b010 || aaa == 3'b011
 					|| aaa == 3'b111) begin //  ORA, AND, EOR, ADC, SBC
@@ -334,7 +336,7 @@ module cpu (input clk,
 			end
 			end
 
-			default: begin alu_b = 0; sb = 0; end
+			default: begin alu_b = 0; sb = SB_A; $display("in default for alu_b"); end
 		endcase
 	end
 
@@ -359,6 +361,7 @@ module cpu (input clk,
 		endcase
 	end
 
+/*
  	always_comb begin
 		if (state != ABS_T3 && state != ZP_T2)
 			addr = {PCH, PCL};
@@ -367,6 +370,9 @@ module cpu (input clk,
 		else
 			addr = 0;
 	end
+
+*/
+
 /*
 	// abl logic
 	always_comb begin
@@ -381,13 +387,14 @@ module cpu (input clk,
 */
 
 	// abh logic
-	always_comb begin
+	always_ff @ (posedge clk) begin
 		case (state)
 
-			ABS_T2: abh = d_in;
+			ABS_T2: begin addr[15:8] <= d_in; addr[7:0] <= ABL; end
 
-			ZP_T2:  abh = 0;
-		   default: abh = 0;	
+			ZP_T2:  begin addr[15:8] <= 0; addr[7:0] <= ABL; end
+ 
+		   default: addr <= {PCH, PCL};
 		endcase	
 	end
 
@@ -499,6 +506,7 @@ module cpu (input clk,
 	   case (sb)
 			SB_A:	alu_a <= A;
 			SB_X: alu_a <= X;
+			default alu_a <= -1;
 		endcase
 
 		// This variable is set to the value of the carry flag every cycle

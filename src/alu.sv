@@ -32,5 +32,6 @@ module alu (input [7:0] alu_a,
 
 			default begin tmp_out = alu_a; $display("default alu"); end 
 		endcase
+
 	end
 endmodule

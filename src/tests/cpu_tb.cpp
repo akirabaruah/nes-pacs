@@ -36,6 +36,7 @@ int main(int argc, char **argv) {
 	printf("%8s,%8s,%8s,%8s\n",
 		   "time", "in", "out", "addr");
 
+	tick(cpu);
 	while (1) {
 		if (Verilated::gotFinish()) { break; }
 
