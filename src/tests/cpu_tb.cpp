@@ -45,14 +45,13 @@ int main(int argc, char **argv) {
 
 		if (cpu->write) { memory[cpu->addr] = cpu->d_out; }
 
+		tick(cpu);
+
 		input = memory[addr];
 		cpu->d_in = input;
 
-
 		printf("%8d,%8.2x,%8.2x,%8.2x\n",
                time, cpu->d_in, cpu->d_out, cpu->addr);
-
-		tick(cpu);
 		time++;
 	}
 	cpu->final();
