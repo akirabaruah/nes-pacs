@@ -62,9 +62,9 @@ module cpu (
                D_OUT, // data output
                IR,    // instruction register
                P,     // processor status
-               PCH,   // program counter high
-               PCL,   // program counter low
-               SP;    // stack pointer
+               SP,    // stack pointer
+               ADL,   // address low
+               ADH;   // address high
 
    /*
     * Instruction Fields
@@ -81,35 +81,7 @@ module cpu (
 
 	
 
-
-   /*
-    * Controller FSM
-    */
-
-   enum {
-         DECODE, // T0
-         FETCH  // TX (final state of instruction)
-         } state;
-
-   initial state = FETCH;
-
-   always_ff @ (posedge clk)
-     begin
-        case (state)
-          FETCH:   state <= DECODE;
-          DECODE: begin
-             casex (d_in)
-               default: state <= FETCH; // Immediate
-             endcase
-          end
-
-          default: state <= FETCH;
-        endcase;
-
-        $display("sync:%b addr:%x d_in:%x A:%x X:%x Y:%x a:%x b:%x: out:%x P:%x",
-                 sync, addr, d_in, A, X, Y, alu_a, alu_b, alu_out, P);
-     end
-
+   logic [15:0] PC;   // program counter
 
    /*
     * Instruction Register
@@ -128,6 +100,28 @@ module cpu (
    always_ff @ (posedge clk)
      begin
         case (state)
+          default: A <= d_in;
+        endcase;
+     end
+
+   /*
+    * X Index Register
+    */
+
+   always_ff @ (posedge clk)
+     begin
+        case (state)
+          default: X <= X + 1;
+        endcase;
+     end
+
+   /*
+    * Y Index Register
+    */
+
+   always_ff @ (posedge clk)
+     begin
+        case (state)
 			 DECODE:
 				case (aaa)
 					default: A <= A; 
@@ -139,29 +133,6 @@ module cpu (
 					default: A <= A; 
 				endcase
 			 default: 		A <= A;
-	
-        endcase
-     end
-
-   /*
-    * X Index Register
-    */
-
-   always_ff @ (posedge clk)
-     begin
-        case (state)
-          default: X <= d_in;
-        endcase;
-     end
-
-   /*
-    * Y Index Register
-    */
-
-   always_ff @ (posedge clk)
-     begin
-        case (state)
-          default: Y <= d_in;
         endcase;
      end
 
@@ -176,16 +147,78 @@ module cpu (
         endcase;
      end
 
-
    /*
     * Program Counter
+    */
+
+   logic pc_hold = 0;
+   always_ff @ (posedge clk)
+     begin
+        if (!pc_hold) begin
+           PC <= PC + 1;
+        end
+     end
+
+   /*
+    * Address Low Register
     */
 
    always_ff @ (posedge clk)
      begin
         case (state)
-          default: {PCH, PCL} <= {PCH, PCL} + 1;
+          ABS1:    ADL <= d_in;
+          default: ADL <= 0;
         endcase;
+     end
+
+   /*
+    * Address High Register
+    */
+
+   always_ff @ (posedge clk)
+     begin
+        case (state)
+          ABS2:    ADH <= d_in;
+          default: ADH <= 0;
+        endcase;
+     end
+
+
+   /*
+    * Controller FSM
+    */
+
+   enum {
+         DECODE, // T0
+         FETCH,  // TX (final state of instruction)
+
+         ABS1,
+         ABS2
+         } state;
+
+   initial state = FETCH;
+
+   always_ff @ (posedge clk)
+     begin
+        case (state)
+          FETCH:   state <= DECODE;
+          DECODE: begin
+             casex (d_in)
+               8'bxxx01101,
+               8'bxxx01110,
+               8'bxxx01100: state <= ABS1;  // Absolute
+               default:     state <= FETCH; // Immediate
+             endcase
+          end
+
+          ABS1:    state <= ABS2;
+          ABS2:    state <= FETCH;
+
+          default: state <= FETCH;
+        endcase;
+
+        $display("sync:%b addr:%x d_in:%x A:%x X:%x Y:%x a:%x b:%x: out:%x P:%x",
+                 sync, addr, d_in, A, X, Y, alu_a, alu_b, alu_out, P);
      end
 
 
@@ -193,17 +226,13 @@ module cpu (
     * Address Output
     */
 
-   assign addr = {PCH, PCL};
- 	// always_comb
-    //   begin
-	// 	 if (state != ABS_T3 && state != ZP_T2)
-	// 	   addr = {PCH, PCL};
-	// 	 else if (state == ABS_T3 || state == ZP_T2)
-	// 	   addr = {abh, ABL};
-	// 	 else
-	// 	   addr = {PCH, PCL};
-	//   end
-
+   always_comb
+     begin
+        case (state)
+          ABS2:    addr = {d_in, ADL};
+          default: addr = PC;
+        endcase;
+     end
 
    /*
     * alu_a, alu_b control
@@ -212,7 +241,8 @@ module cpu (
    always_comb
      begin
         case (state)
-          default: alu_a = A;
+          FETCH:   alu_a = dbus;
+          default: alu_a = 0;
         endcase;
      end
 
@@ -231,7 +261,7 @@ module cpu (
    logic [7:0] dbus;
    always_comb
      begin
-        case (state)
+        case (IR)
           default: dbus = d_in;
         endcase;
      end
