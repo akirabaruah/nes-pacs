@@ -93,9 +93,28 @@ module cpu (
           IR <= d_in;
      end
 
+
+	logic arith;
+	always_comb begin
+		case (aaa)
+				LDA: 		arith = 0;
+
+				ORA:		arith = 1;
+				AND:		arith = 1;
+				EOR:		arith = 1;
+				ADC:		arith = 1;
+				SBC:		arith = 1;
+				default: arith = 0;
+		endcase
+	end
+			
+
+
+
    /*
     * Accumulator
     */
+//  ORA, AND, EOR, ADC, SBC
 
    always_ff @ (posedge clk)
      begin
@@ -105,11 +124,10 @@ module cpu (
 					default: A <= A;
 				endcase
 			 FETCH:
-				case (aaa)
-					LDA: 		A <= d_in;
-					ADC:		A <= alu_out;
-					default: A <= A;
-				endcase
+				if (arith)
+					A <= alu_out;
+				else
+					A <= d_in;
 			 default: 		A <= A;
         endcase;
      end
@@ -261,9 +279,13 @@ module cpu (
    logic [7:0] dbus;
    always_comb
      begin
-        case (IR)
-          default: dbus = d_in;
-        endcase;
+		case (state)
+			FETCH:
+				if (arith)
+					dbus = A; 
+				else
+					dbus = d_in;
+		endcase
      end
 
 
