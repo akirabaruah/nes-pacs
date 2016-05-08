@@ -8,35 +8,35 @@ parameter
 
 
 /*
- * Opcodes {aaa, cc}
+ * Opcodes {aaa}
  */
 
 parameter
-  ORA = 5'b000,
-  AND = 5'b001,
-  EOR = 5'b010,
-  ADC = 5'b011,
-  STA = 5'b100,
-  LDA = 5'b101,
-  CMP = 5'b110,
-  SBC = 5'b111,
+  ORA = 3'b000,
+  AND = 3'b001,
+  EOR = 3'b010,
+  ADC = 3'b011,
+  STA = 3'b100,
+  LDA = 3'b101,
+  CMP = 3'b110,
+  SBC = 3'b111,
 
-  ASL = 5'b000,
-  ROL = 5'b001,
-  LSR = 5'b010,
-  ROR = 5'b011,
-  STX = 5'b100,
-  LDX = 5'b101,
-  DEC = 5'b110,
-  INC = 5'b111,
+  ASL = 3'b000,
+  ROL = 3'b001,
+  LSR = 3'b010,
+  ROR = 3'b011,
+  STX = 3'b100,
+  LDX = 3'b101,
+  DEC = 3'b110,
+  INC = 3'b111,
 
-  BRK = 5'b000,
-  BIT = 5'b001,
-  JMP = 5'b010,
-  STY = 5'b100,
-  LDY = 5'b101,
-  CPY = 5'b110,
-  CPX = 5'b111;
+  BRK = 3'b000,
+  BIT = 3'b001,
+  JMP = 3'b010,
+  STY = 3'b100,
+  LDY = 3'b101,
+  CPY = 3'b110,
+  CPX = 3'b111;
 
 
 module cpu (
