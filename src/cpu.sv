@@ -79,7 +79,7 @@ module cpu (
    assign opcode = {aaa, cc};
 	assign t1op = {d_in[7:5], d_in[1:0]};
 
-	
+
 
    logic [15:0] PC;   // program counter
 
@@ -100,7 +100,17 @@ module cpu (
    always_ff @ (posedge clk)
      begin
         case (state)
-          default: A <= d_in;
+			 DECODE:
+				case (aaa)
+					default: A <= A;
+				endcase
+			 FETCH:
+				case (aaa)
+					LDA: 		A <= d_in;
+					ADC:		A <= alu_out;
+					default: A <= A;
+				endcase
+			 default: 		A <= A;
         endcase;
      end
 
@@ -122,17 +132,7 @@ module cpu (
    always_ff @ (posedge clk)
      begin
         case (state)
-			 DECODE:
-				case (aaa)
-					default: A <= A; 
-				endcase
-			 FETCH: 
-				case (aaa)
-					LDA: 		A <= d_in;
-					ADC:		A <= alu_out;
-					default: A <= A; 
-				endcase
-			 default: 		A <= A;
+          default: Y <= Y + 1;
         endcase;
      end
 
