@@ -24,8 +24,6 @@ module cpu (
     * Registers
     */
 
-   logic [4:0] alu_mode;
-   logic [4:0] alu_instruction;
    logic [7:0] A,     // accumulator
                X,     // X index
                Y,     // Y index
@@ -46,6 +44,8 @@ module cpu (
          FETCH   // TX (final state of instruction)
          } state;
 
+   initial state = FETCH;
+
    always_ff @ (posedge clk)
      begin
         case (state)
@@ -59,7 +59,8 @@ module cpu (
           default: state <= FETCH;
         endcase;
 
-        $display("A:%b X:%b Y:%b", A, X, Y);
+        $display("sync:%b addr:%x d_in:%x A:%x X:%x Y:%x a:%x b:%x: out:%x P:%x",
+                 sync, addr, d_in, A, X, Y, alu_a, alu_b, alu_out, P);
      end
 
 
@@ -73,12 +74,20 @@ module cpu (
           IR <= d_in;
      end
 
+   /*
+    * Accumulator
+    */
+
    always_ff @ (posedge clk)
      begin
         case (state)
           default: A <= d_in;
         endcase;
      end
+
+   /*
+    * X Index Register
+    */
 
    always_ff @ (posedge clk)
      begin
@@ -87,12 +96,28 @@ module cpu (
         endcase;
      end
 
+   /*
+    * Y Index Register
+    */
+
    always_ff @ (posedge clk)
      begin
         case (state)
           default: Y <= d_in;
         endcase;
      end
+
+   /*
+    * Processor Status Register
+    */
+
+   always_ff @ (posedge clk)
+     begin
+        case (state)
+          default: P <= d_in; //{sign, over, 4'b0000, zero, cout};
+        endcase;
+     end
+
 
    /*
     * Program Counter
@@ -159,16 +184,39 @@ module cpu (
     */
 
    logic [7:0] alu_a, alu_b, alu_out;
+   logic [4:0] alu_mode;
+   logic cout, over, zero, sign;
    alu ALU(
 		   .alu_a(alu_a),
 	       .alu_b(alu_b),
-		   .mode(ALU_ADD),
+		   .mode(alu_mode),
 	       .carry_in(0),
 	       .alu_out(alu_out),
-	       .carry_out(P[0]),
-		   .overflow(P[6]),
-		   .zero(P[1]),
-		   .sign(P[7])
+	       .carry_out(cout),
+		   .overflow(over),
+		   .zero(over),
+		   .sign(sign)
            );
+
+   always_comb
+     begin
+        casex (IR)
+          8'b000xxx01: alu_mode = ALU_OR;
+          8'b001xxx01: alu_mode = ALU_AND;
+          8'b010xxx01: alu_mode = ALU_EOR;
+          8'b011xxx01: alu_mode = ALU_ADD;
+          8'b111xxx01: alu_mode = ALU_SUB;
+          8'b010xxx10: alu_mode = ALU_SR;
+
+          default: alu_mode = ALU_ADD;
+        endcase
+     end
+
+
+   /*
+    * SYNC Signal
+    */
+
+   assign sync = (state == DECODE);
 
 endmodule; // cpu
