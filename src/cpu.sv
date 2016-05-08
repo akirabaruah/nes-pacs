@@ -114,7 +114,7 @@ module cpu (
    always_ff @ (posedge clk)
      begin
         case (state)
-          default: P <= d_in; //{sign, over, 4'b0000, zero, cout};
+          default: P <= {sign, over, X[0], Y[0], 2'b00, zero, cout}; // some bs
         endcase;
      end
 
