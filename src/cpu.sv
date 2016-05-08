@@ -7,6 +7,38 @@ parameter
   ALU_SUB = 5;
 
 
+/*
+ * Opcodes {aaa, cc}
+ */
+
+parameter
+  ORA = 5'b000,
+  AND = 5'b001,
+  EOR = 5'b010,
+  ADC = 5'b011,
+  STA = 5'b100,
+  LDA = 5'b101,
+  CMP = 5'b110,
+  SBC = 5'b111,
+
+  ASL = 5'b000,
+  ROL = 5'b001,
+  LSR = 5'b010,
+  ROR = 5'b011,
+  STX = 5'b100,
+  LDX = 5'b101,
+  DEC = 5'b110,
+  INC = 5'b111,
+
+  BRK = 5'b000,
+  BIT = 5'b001,
+  JMP = 5'b010,
+  STY = 5'b100,
+  LDY = 5'b101,
+  CPY = 5'b110,
+  CPX = 5'b111;
+
+
 module cpu (
             input clk,
             input reset,
@@ -36,6 +68,21 @@ module cpu (
                PCL,   // program counter low
                SP;    // stack pointer
 
+   /*
+    * Instruction Fields
+    */
+
+   logic [2:0] aaa;
+   logic [2:0] bbb;
+   logic [1:0] cc;
+   logic [4:0] opcode;
+
+   assign {aaa, bbb, cc} = IR;
+   assign opcode = {aaa, cc};
+	assign t1op = {d_in[7:5], d_in[1:0]};
+
+	
+
 
    /*
     * Controller FSM
@@ -43,7 +90,7 @@ module cpu (
 
    enum {
          DECODE, // T0
-         FETCH   // TX (final state of instruction)
+         FETCH  // TX (final state of instruction)
          } state;
 
    always_ff @ (posedge clk)
@@ -59,7 +106,7 @@ module cpu (
           default: state <= FETCH;
         endcase;
 
-        $display("A:%b X:%b Y:%b", A, X, Y);
+        $display("A:%b X:%b Y:%b a:%b b:%b alu_out:%b state:%d", A, X, Y, alu_a, alu_b, alu_out, state);
      end
 
 
@@ -76,8 +123,19 @@ module cpu (
    always_ff @ (posedge clk)
      begin
         case (state)
-          default: A <= d_in;
-        endcase;
+			 DECODE:
+				case (aaa)
+					default: A <= A; 
+				endcase
+			 FETCH: 
+				case (aaa)
+					LDA: 		A <= d_in;
+					ADC:		A <= alu_out;
+					default: A <= A; 
+				endcase
+			 default: 		A <= A;
+	
+        endcase
      end
 
    always_ff @ (posedge clk)
