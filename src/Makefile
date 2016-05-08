@@ -6,7 +6,11 @@ ASMDIR=asm
 SUBMODULES= alu.sv
 
 .PHONY: all
-all: Vcpu $(TESTS)
+all: Vcpu $(TESTS) sim
+
+.PHONY: sim
+sim:
+	make -C std/
 
 # Verilator
 V%: %.sv $(TESTDIR)/%_tb.cpp
@@ -24,3 +28,4 @@ run_test_%: test_%
 .PHONY: clean
 clean:
 	rm -rf obj_dir/ test_*
+	make -C std/ clean

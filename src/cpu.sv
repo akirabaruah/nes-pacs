@@ -7,6 +7,38 @@ parameter
   ALU_SUB = 5;
 
 
+/*
+ * Opcodes {aaa}
+ */
+
+parameter
+  ORA = 3'b000,
+  AND = 3'b001,
+  EOR = 3'b010,
+  ADC = 3'b011,
+  STA = 3'b100,
+  LDA = 3'b101,
+  CMP = 3'b110,
+  SBC = 3'b111,
+
+  ASL = 3'b000,
+  ROL = 3'b001,
+  LSR = 3'b010,
+  ROR = 3'b011,
+  STX = 3'b100,
+  LDX = 3'b101,
+  DEC = 3'b110,
+  INC = 3'b111,
+
+  BRK = 3'b000,
+  BIT = 3'b001,
+  JMP = 3'b010,
+  STY = 3'b100,
+  LDY = 3'b101,
+  CPY = 3'b110,
+  CPX = 3'b111;
+
+
 module cpu (
             input clk,
             input reset,
@@ -24,44 +56,32 @@ module cpu (
     * Registers
     */
 
-   logic [4:0] alu_mode;
-   logic [4:0] alu_instruction;
    logic [7:0] A,     // accumulator
                X,     // X index
                Y,     // Y index
                D_OUT, // data output
                IR,    // instruction register
                P,     // processor status
-               PCH,   // program counter high
-               PCL,   // program counter low
-               SP;    // stack pointer
-
+               SP,    // stack pointer
+               ADL,   // address low
+               ADH;   // address high
 
    /*
-    * Controller FSM
+    * Instruction Fields
     */
 
-   enum {
-         DECODE, // T0
-         FETCH   // TX (final state of instruction)
-         } state;
+   logic [2:0] aaa;
+   logic [2:0] bbb;
+   logic [1:0] cc;
+   logic [4:0] opcode;
 
-   always_ff @ (posedge clk)
-     begin
-        case (state)
-          FETCH:   state <= DECODE;
-          DECODE: begin
-             casex (d_in)
-               default: state <= FETCH; // Immediate
-             endcase
-          end
+   assign {aaa, bbb, cc} = IR;
+   assign opcode = {aaa, cc};
+	assign t1op = {d_in[7:5], d_in[1:0]};
 
-          default: state <= FETCH;
-        endcase;
 
-        $display("A:%b X:%b Y:%b", A, X, Y);
-     end
 
+   logic [15:0] PC;   // program counter
 
    /*
     * Instruction Register
@@ -73,24 +93,75 @@ module cpu (
           IR <= d_in;
      end
 
-   always_ff @ (posedge clk)
-     begin
-        case (state)
-          default: A <= d_in;
-        endcase;
-     end
+
+	logic arith;
+	always_comb begin
+		case (aaa)
+				LDA: 		arith = 0;
+
+				ORA:		arith = 1;
+				AND:		arith = 1;
+				EOR:		arith = 1;
+				ADC:		arith = 1;
+				SBC:		arith = 1;
+				default: arith = 0;
+		endcase
+	end
+			
+
+
+
+   /*
+    * Accumulator
+    */
+//  ORA, AND, EOR, ADC, SBC
 
    always_ff @ (posedge clk)
      begin
         case (state)
-          default: X <= d_in;
+			 DECODE:
+				case (aaa)
+					default: A <= A;
+				endcase
+			 FETCH:
+				if (arith)
+					A <= alu_out;
+				else
+					A <= d_in;
+			 default: 		A <= A;
         endcase;
      end
+
+   /*
+    * X Index Register
+    */
 
    always_ff @ (posedge clk)
      begin
         case (state)
-          default: Y <= d_in;
+          default: X <= X + 1;
+        endcase;
+     end
+
+   /*
+    * Y Index Register
+    */
+
+   always_ff @ (posedge clk)
+     begin
+        case (state)
+          default: Y <= Y + 1;
+        endcase;
+     end
+
+   /*
+    * Processor Status Register
+    */
+
+   always_ff @ (posedge clk)
+     begin
+        case (state)
+          default: P <= {sign, over, X[0], Y[0], 2'b00, zero, cout}; // some bs
         endcase;
      end
 
@@ -98,11 +169,74 @@ module cpu (
     * Program Counter
     */
 
+   logic pc_hold = 0;
+   always_ff @ (posedge clk)
+     begin
+        if (!pc_hold) begin
+           PC <= PC + 1;
+        end
+     end
+
+   /*
+    * Address Low Register
+    */
+
    always_ff @ (posedge clk)
      begin
         case (state)
-          default: {PCH, PCL} <= {PCH, PCL} + 1;
+          ABS1:    ADL <= d_in;
+          default: ADL <= 0;
         endcase;
+     end
+
+   /*
+    * Address High Register
+    */
+
+   always_ff @ (posedge clk)
+     begin
+        case (state)
+          ABS2:    ADH <= d_in;
+          default: ADH <= 0;
+        endcase;
+     end
+
+
+   /*
+    * Controller FSM
+    */
+
+   enum {
+         DECODE, // T0
+         FETCH,  // TX (final state of instruction)
+
+         ABS1,
+         ABS2
+         } state;
+
+   initial state = FETCH;
+
+   always_ff @ (posedge clk)
+     begin
+        case (state)
+          FETCH:   state <= DECODE;
+          DECODE: begin
+             casex (d_in)
+               8'bxxx01101,
+               8'bxxx01110,
+               8'bxxx01100: state <= ABS1;  // Absolute
+               default:     state <= FETCH; // Immediate
+             endcase
+          end
+
+          ABS1:    state <= ABS2;
+          ABS2:    state <= FETCH;
+
+          default: state <= FETCH;
+        endcase;
+
+        $display("sync:%b addr:%x d_in:%x A:%x X:%x Y:%x a:%x b:%x: out:%x P:%x",
+                 sync, addr, d_in, A, X, Y, alu_a, alu_b, alu_out, P);
      end
 
 
@@ -110,17 +244,13 @@ module cpu (
     * Address Output
     */
 
-   assign addr = {PCH, PCL};
- 	// always_comb
-    //   begin
-	// 	 if (state != ABS_T3 && state != ZP_T2)
-	// 	   addr = {PCH, PCL};
-	// 	 else if (state == ABS_T3 || state == ZP_T2)
-	// 	   addr = {abh, ABL};
-	// 	 else
-	// 	   addr = {PCH, PCL};
-	//   end
-
+   always_comb
+     begin
+        case (state)
+          ABS2:    addr = {d_in, ADL};
+          default: addr = PC;
+        endcase;
+     end
 
    /*
     * alu_a, alu_b control
@@ -129,7 +259,8 @@ module cpu (
    always_comb
      begin
         case (state)
-          default: alu_a = A;
+          FETCH:   alu_a = dbus;
+          default: alu_a = 0;
         endcase;
      end
 
@@ -148,9 +279,13 @@ module cpu (
    logic [7:0] dbus;
    always_comb
      begin
-        case (state)
-          default: dbus = d_in;
-        endcase;
+		case (state)
+			FETCH:
+				if (arith)
+					dbus = A; 
+				else
+					dbus = d_in;
+		endcase
      end
 
 
@@ -159,16 +294,39 @@ module cpu (
     */
 
    logic [7:0] alu_a, alu_b, alu_out;
+   logic [4:0] alu_mode;
+   logic cout, over, zero, sign;
    alu ALU(
 		   .alu_a(alu_a),
 	       .alu_b(alu_b),
-		   .mode(ALU_ADD),
+		   .mode(alu_mode),
 	       .carry_in(0),
 	       .alu_out(alu_out),
-	       .carry_out(P[0]),
-		   .overflow(P[6]),
-		   .zero(P[1]),
-		   .sign(P[7])
+	       .carry_out(cout),
+		   .overflow(over),
+		   .zero(over),
+		   .sign(sign)
            );
+
+   always_comb
+     begin
+        casex (IR)
+          8'b000xxx01: alu_mode = ALU_OR;
+          8'b001xxx01: alu_mode = ALU_AND;
+          8'b010xxx01: alu_mode = ALU_EOR;
+          8'b011xxx01: alu_mode = ALU_ADD;
+          8'b111xxx01: alu_mode = ALU_SUB;
+          8'b010xxx10: alu_mode = ALU_SR;
+
+          default: alu_mode = ALU_ADD;
+        endcase
+     end
+
+
+   /*
+    * SYNC Signal
+    */
+
+   assign sync = (state == DECODE);
 
 endmodule; // cpu

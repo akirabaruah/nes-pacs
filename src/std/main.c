@@ -14,6 +14,16 @@ void write6502(uint16_t address, uint8_t value) {
     memory[address] = value;
 }
 
+void print_stats(void) {
+    static int first = 1;
+    if (first) {
+        printf("Cycle Op  A  X  Y  P\n");
+        first = 0;
+    }
+    printf("%5d %.2x %.2x %.2x %.2x %.2x\n",
+           clockticks6502, opcode, a, x, y, status);
+}
+
 int main(int argc, char **argv) {
     if (argc != 2) {
         printf("usage: %s <6502 binary>\n", argv[0]);
@@ -34,12 +44,10 @@ int main(int argc, char **argv) {
 
     /* Start simulation */
     reset6502();
-    printf("Op:%.2x Cycle:%3d PC:%.2x A:%.2x X:%.2x Y:%.2x P:%.2x\n",
-           opcode, clockticks6502, pc, a, x, y, status);
+    print_stats();
     while ((status & 0x04) == 0) {
         step6502();
-        printf("Op:%.2x Cycle:%3d PC:%.2x A:%.2x X:%.2x Y:%.2x P:%.2x\n",
-               opcode, clockticks6502, pc, a, x, y, status);
+        print_stats();
     }
 
     return 0;
