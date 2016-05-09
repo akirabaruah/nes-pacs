@@ -1,4 +1,4 @@
-LDA #$07
-STA $00aa
-LDA #$01
 LDA $00aa
+ADC #$01
+ADC $00aa
+ADC #$01
