@@ -10,7 +10,8 @@ logic [7:0] mem [65535:0];   // 65536-size array of 8-bit elements
 always_ff @(posedge clk) begin
    if (write) 
       mem[addr] <= in;
-   out <= mem[addr];
+   else
+      out <= mem[addr];
 end
 
 endmodule
