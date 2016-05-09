@@ -1,9 +1,7 @@
 parameter
-   RESET_CPU  = 8'b0,
-   START_CPU = 8'b1,
-   START_WRITE = 8'b2,
-   WRITE = 8'b3,
-   STOP_WRITE = 8'b4
+   RESET_CPU  = 8'd0,
+   START_CPU  = 8'd1,
+   WRITE      = 8'd2,
 ;
 
 module nes (
@@ -22,11 +20,11 @@ logic one = 1;
 logic cpu_ready;
 logic sync;
 logic cpu_write, mem_write, cpu_reset;
-logic [15:0] cpu_addr, mem_addr;
+logic [15:0] cpu_addr, mem_addr, pc;
 logic [7:0] d_in, d_out, mem_in, mem_out;
-logic [15:0] program_end = 0;
-
 logic [7:0] nes_op;                       // our own NES opcodes
+
+assign d_in = writedata[7:0]
 assign nes_op = writedata[15:8];
 
 cpu c (
@@ -55,32 +53,24 @@ always_ff @(posedge clk) begin
       RESET_CPU: begin
          mem_write <= 0;
          cpu_reset <= 1;
-         program_end <= 0;
          end
       START_CPU: begin
          cpu_ready <= 1;
          cpu_reset <= 0;
-         end
-      START_WRITE: begin
-         mem_addr <= address;
-         program_end <= address + 1;
-         mem_write <= 1;
-         mem_in <= writedata[7:0];
+         cpu_addr <= address;
          end
       WRITE: begin
+         cpu_ready <= 0;
          mem_write <= 1;
-         mem_addr <= mem_addr + 1;
-         program_end <= program_end + 1;
+         mem_addr <= addr;
          mem_in <= writedata[7:0]
          end
-      STOP_WRITE: begin
-         mem_write <= 0;
-         end
       default: begin
-         mem_write <= 0;
-         cpu_ready <= 0;
+         cpu_ready <= 1;
+         cpu_addr <= cpu_addr + 1;
          end
    endcase
 end
+
 
 endmodule
