@@ -13,7 +13,7 @@ module nes (
    input logic write,               // obsolete
    input logic [15:0] writedata,
    input logic [15:0] address,
-   output logic [7:0] readdata
+   output logic [7:0] readdata,
    output [14:0] hps_memory_mem_a,
    output [2:0]  hps_memory_mem_ba,
    output        hps_memory_mem_ck,
@@ -34,11 +34,9 @@ module nes (
 
 logic zero = 0;
 logic one = 1;
-
-logic cpu_ready;
-logic sync;
-logic cpu_write, mem_write, cpu_reset;
-logic [15:0] cpu_addr, mem_addr, pc;
+logic cpu_ready = 0;
+logic sync, cpu_write, mem_write, cpu_reset;
+logic [15:0] cpu_addr, mem_addr;
 logic [7:0] d_in, d_out, mem_in, mem_out;
 logic [7:0] nes_op;                       // our own NES opcodes
 
@@ -52,6 +50,7 @@ cpu c (
    .irq (zero),
    .nmi (zero),
    .d_in (d_in),
+
    .write (cpu_write),
    .sync (sync),
    .d_out (d_out),
@@ -63,6 +62,7 @@ memory mem (
    .addr (mem_addr),
    .write (mem_write),
    .in (mem_in),
+
    .out (mem_out)
 );
 
@@ -84,18 +84,17 @@ always_ff @(posedge clk) begin
       START_CPU: begin
          cpu_ready <= 1;
          cpu_reset <= 0;
+         d_in <= mem_out;
          mem_in <= d_out;
          mem_write <= cpu_write;
-         d_in <= mem_out;
          mem_addr <= cpu_addr;
          end
       default: begin             // keep running CPU
-         mem_write <= 0;
          cpu_ready <= 1;
          cpu_reset <= 0;
+         d_in <= mem_out;
          mem_in <= d_out;
          mem_write <= cpu_write;
-         d_in <= mem_out;
          mem_addr <= cpu_addr;
          end
    endcase
