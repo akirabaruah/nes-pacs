@@ -6,11 +6,11 @@ parameter
 
 module nes (
    input logic clk,
-   input logic reset,
-   input logic chipselect,
-   input logic read, 
+   input logic reset,                     // obsolete
+   input logic chipselect,                // ??
+   input logic read,                      // obsolete
    output logic [7:0] readdata,
-   input logic write,
+   input logic write,                     // obsolete
    input logic [15:0] writedata,
    input logic [15:0] address
 );
