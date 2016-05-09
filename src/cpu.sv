@@ -191,7 +191,7 @@ module cpu (
 
 		  ABSX1:	 ADL <= alu_out;
 
-          default: ADL <= 0;
+          default: ADL <= ADL;
         endcase;
      end
 
@@ -203,11 +203,9 @@ module cpu (
      begin
         case (state)
           ABS2:    ADH <= d_in;
+		  ABSX2:	 ADH <= alu_out;
 
-		  ABSX2:	 ADH <= d_in;
-		  ABSX3:	 ADH <= alu_out;
-
-          default: ADH <= 0;
+          default: ADH <= ADH;
         endcase;
      end
 
@@ -318,7 +316,7 @@ module cpu (
    always_comb
      begin
         case (state)
-          ABSX3:   cin = P[0];
+          ABSX2:   cin = P[0];
           default: cin = 0;
         endcase
      end
