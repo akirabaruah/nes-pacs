@@ -175,6 +175,9 @@ module cpu (
 		  ABSY3,
 		  ABSX2,
 		  ABSX3,
+        ZPX1,
+        ZPX2,
+        ZPX3,
 		  ZP1:     PC <= PC;
 		  default: PC <= PC + 1;
         endcase
@@ -225,6 +228,8 @@ module cpu (
             INDX1: BAL <= alu_out;
             INDX2: BAL <= alu_out;
             INDX3: BAL <= alu_out;
+
+            ZPX1:  BAL <= alu_out;
          endcase
       end
 
@@ -249,6 +254,8 @@ module cpu (
 		  ABSY3:	 addr = {ADH, ADL};
 
 		  ZP1:    addr = {8'b0, d_in};
+
+        ZPX3:   addr = {8'b0, BAL};
 
           default: addr = PC;
         endcase;
@@ -279,6 +286,10 @@ module cpu (
          INDX3,
          INDX4,
 
+         ZPX1,
+         ZPX2,
+         ZPX3,
+
 		   ZP1
          
 			} state;
@@ -298,6 +309,7 @@ module cpu (
                8'bxxx11101: state <= ABSX1; // Absolute X
                8'bxxx11001: state <= ABSY1; // Absolute Y
                8'bxxx00001: state <= INDX1; // Indirect, X
+               8'bxxx10101: state <= ZPX1;  // Zero Page X
 
                default:     state <= FETCH; // Immediate
              endcase
@@ -321,6 +333,11 @@ module cpu (
           ABSY3:   state <= FETCH;
 
   		    ZP1:     state <= FETCH;
+
+          ZPX1:    state <= ZPX2;
+          ZPX2:    state <= ZPX3;
+          ZPX3:    state <= FETCH;
+         
 
           default: state <= FETCH;
         endcase;
@@ -348,6 +365,8 @@ module cpu (
         ABSY1: alu_a = Y;
         ABSY3: alu_a = ADH;
 
+        ZPX1:  alu_a = X;
+
 		  FETCH: alu_a = arith ? A : d_in;
 
           default: alu_a = 0;
@@ -366,6 +385,8 @@ module cpu (
 
         ABSY1:  alu_b = d_in; // ADL
         ABSY3:  alu_b = P[0];
+
+        ZPX1:   alu_b = d_in;
 
 		  FETCH:	 alu_b = d_in;
           default: alu_b = d_in;
