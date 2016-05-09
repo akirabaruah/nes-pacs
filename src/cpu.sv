@@ -255,7 +255,7 @@ module cpu (
         case (state)
           FETCH:   state <= DECODE;
           DECODE: begin
-             casex (state)
+             casex (d_in)
                8'bxxx01101,
                8'bxxx01110,
                8'bxxx01100: state <= ABS1;  // Absolute
@@ -290,11 +290,10 @@ module cpu (
    always_comb
      begin
         case (state)
+		  ABSX1: alu_a = X;
+		  ABSX3: alu_a = ADH;
 
-		  ABSX1:	 alu_a = dbus;
-		  ABSX3:	 alu_a = dbus;
-
-          FETCH:   alu_a = dbus;
+		  FETCH: alu_a = arith ? A : d_in;
 
           default: alu_a = 0;
         endcase;
@@ -322,26 +321,6 @@ module cpu (
           ABSX3:   cin = P[0];
           default: cin = 0;
         endcase
-     end
-
-   /*
-    * Data Bus
-    */
-
-   logic [7:0] dbus;
-   always_comb
-     begin
-		case (state)
-
-		  ABSX1: dbus = X;
-		  ABSX3: dbus = ADH;
-
-		  FETCH:
-			if (arith)
-			  dbus = A;
-			else
-			  dbus = d_in;
-		endcase
      end
 
    /*
