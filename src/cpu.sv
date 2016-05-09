@@ -121,11 +121,7 @@ module cpu (
 			case (aaa)
 			  default: A <= A;
 			endcase
-		  FETCH:
-			if (arith)
-			  A <= alu_out;
-			else
-			  A <= d_in;
+		  FETCH: A <= arith ? alu_out : d_in;
 		  default: 		A <= A;
         endcase;
      end
