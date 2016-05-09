@@ -167,6 +167,8 @@ module cpu (
      begin
         case (state)
 		  ABS2,
+		  ABSY2,
+		  ABSY3,
 		  ABSX2,
 		  ABSX3,
 		  ZP1:     PC <= PC;
@@ -187,6 +189,8 @@ module cpu (
 
 		  ABSX1:	 ADL <= alu_out;
 
+		  ABSY1:	 ADL <= alu_out;
+
           default: ADL <= ADL;
         endcase;
      end
@@ -199,7 +203,10 @@ module cpu (
      begin
         case (state)
           ABS2:    ADH <= d_in;
+
 		  ABSX2:	 ADH <= alu_out;
+
+		  ABSY2:	 ADH <= alu_out;
 
           default: ADH <= ADH;
         endcase;
@@ -216,6 +223,9 @@ module cpu (
 
 		  ABSX2:	 addr = {d_in, ADL};
 		  ABSX3:	 addr = {ADH, ADL};
+
+		  ABSY2:	 addr = {d_in, ADL};
+		  ABSY3:	 addr = {ADH, ADL};
 
 		  ZP1:		 addr = {8'b0, d_in};
 
@@ -235,12 +245,18 @@ module cpu (
          ABS1,
          ABS2,
 
-		 ABSX1,
-		 ABSX2,
-		 ABSX3,
+  		   ABSX1,
+		   ABSX2,
+		   ABSX3,
 
-		 ZP1
-         } state;
+         ABSY1,
+		   ABSY2,
+		   ABSY3,
+
+
+		   ZP1
+         
+			} state;
 
    initial state = FETCH;
 
@@ -255,6 +271,8 @@ module cpu (
                8'bxxx01100: state <= ABS1;  // Absolute
                8'bxxx00101: state <= ZP1;   // Zero Page
                8'bxxx11101: state <= ABSX1; // Absolute X
+               8'bxxx11001: state <= ABSY1; // Absolute Y
+
                default:     state <= FETCH; // Immediate
              endcase
           end
@@ -266,7 +284,12 @@ module cpu (
           ABSX2:   state <= P[0] ? ABSX3 : FETCH;
           ABSX3:   state <= FETCH;
 
-		  ZP1:     state <= FETCH;
+
+          ABSY1:   state <= ABSY2;
+          ABSY2:   state <= P[0] ? ABSY3 : FETCH;
+          ABSY3:   state <= FETCH;
+
+  		    ZP1:     state <= FETCH;
 
           default: state <= FETCH;
         endcase;
@@ -287,6 +310,9 @@ module cpu (
 		  ABSX1: alu_a = X;
 		  ABSX3: alu_a = ADH;
 
+        ABSY1: alu_a = Y;
+        ABSY3: alu_a = ADH;
+
 		  FETCH: alu_a = arith ? A : d_in;
 
           default: alu_a = 0;
@@ -299,6 +325,9 @@ module cpu (
 
 		  ABSX1:	 alu_b = d_in; // ADL
 		  ABSX3:	 alu_b = P[0];
+
+        ABSY1:  alu_b = d_in; // ADL
+        ABSY3:  alu_b = P[0];
 
 		  FETCH:	 alu_b = d_in;
           default: alu_b = d_in;
@@ -313,6 +342,7 @@ module cpu (
      begin
         case (state)
           ABSX2:   cin = P[0];
+          ABSY2:   cin = P[0];
           default: cin = 0;
         endcase
      end
