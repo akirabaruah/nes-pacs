@@ -1,0 +1,148 @@
+set_global_assignment -entity "soc_system" -library "soc_system" -name IP_TOOL_NAME "Qsys"
+set_global_assignment -entity "soc_system" -library "soc_system" -name IP_TOOL_VERSION "13.1"
+set_global_assignment -entity "soc_system" -library "soc_system" -name IP_TOOL_ENV "Qsys"
+set_global_assignment -library "soc_system" -name SOPCINFO_FILE [file join $::quartus(qip_path) "../../soc_system.sopcinfo"]
+set_global_assignment -entity "soc_system" -library "soc_system" -name SLD_INFO "QSYS_NAME soc_system HAS_SOPCINFO 1 GENERATION_ID 1462772218"
+set_global_assignment -library "soc_system" -name MISC_FILE [file join $::quartus(qip_path) "../../soc_system.cmp"]
+set_global_assignment -library "soc_system" -name SLD_FILE [file join $::quartus(qip_path) "soc_system.regmap"]
+set_global_assignment -library "soc_system" -name MISC_FILE [file join $::quartus(qip_path) "soc_system_hps_0_hps.svd"]
+set_global_assignment -library "soc_system" -name SLD_FILE [file join $::quartus(qip_path) "soc_system.debuginfo"]
+set_global_assignment -name SYNTHESIS_ONLY_QIP ON
+set_global_assignment -library "soc_system" -name MISC_FILE [file join $::quartus(qip_path) "../../soc_system.qsys"]
+set_instance_assignment -name hps_partition on -entity soc_system_hps_0_hps_io_border -library soc_system
+set_instance_assignment -name HPS_LOCATION HPSINTERFACECLOCKSRESETS_X52_Y78_N111 -entity soc_system_hps_0_fpga_interfaces -to clocks_resets
+set_instance_assignment -name HPS_LOCATION HPSINTERFACEDBGAPB_X52_Y80_N111 -entity soc_system_hps_0_fpga_interfaces -to debug_apb
+set_instance_assignment -name HPS_LOCATION HPSINTERFACETPIUTRACE_X52_Y39_N111 -entity soc_system_hps_0_fpga_interfaces -to tpiu
+set_instance_assignment -name HPS_LOCATION HPSINTERFACEBOOTFROMFPGA_X52_Y74_N111 -entity soc_system_hps_0_fpga_interfaces -to boot_from_fpga
+set_instance_assignment -name HPS_LOCATION HPSINTERFACEFPGA2HPS_X52_Y45_N111 -entity soc_system_hps_0_fpga_interfaces -to fpga2hps
+set_instance_assignment -name HPS_LOCATION HPSINTERFACEHPS2FPGALIGHTWEIGHT_X52_Y43_N111 -entity soc_system_hps_0_fpga_interfaces -to hps2fpga_light_weight
+set_instance_assignment -name HPS_LOCATION HPSINTERFACEHPS2FPGA_X52_Y47_N111 -entity soc_system_hps_0_fpga_interfaces -to hps2fpga
+set_instance_assignment -name HPS_LOCATION HPSINTERFACEFPGA2SDRAM_X52_Y53_N111 -entity soc_system_hps_0_fpga_interfaces -to f2sdram
+
+set_global_assignment -library "soc_system" -name VERILOG_FILE [file join $::quartus(qip_path) "soc_system.v"]
+set_global_assignment -library "soc_system" -name VERILOG_FILE [file join $::quartus(qip_path) "submodules/altera_reset_controller.v"]
+set_global_assignment -library "soc_system" -name VERILOG_FILE [file join $::quartus(qip_path) "submodules/altera_reset_synchronizer.v"]
+set_global_assignment -library "soc_system" -name SDC_FILE [file join $::quartus(qip_path) "submodules/altera_reset_controller.sdc"]
+set_global_assignment -library "soc_system" -name VERILOG_FILE [file join $::quartus(qip_path) "submodules/soc_system_mm_interconnect_0.v"]
+set_global_assignment -library "soc_system" -name SYSTEMVERILOG_FILE [file join $::quartus(qip_path) "submodules/altera_merlin_width_adapter.sv"]
+set_global_assignment -library "soc_system" -name SYSTEMVERILOG_FILE [file join $::quartus(qip_path) "submodules/altera_merlin_address_alignment.sv"]
+set_global_assignment -library "soc_system" -name SYSTEMVERILOG_FILE [file join $::quartus(qip_path) "submodules/altera_merlin_burst_uncompressor.sv"]
+set_global_assignment -library "soc_system" -name SYSTEMVERILOG_FILE [file join $::quartus(qip_path) "submodules/altera_merlin_arbitrator.sv"]
+set_global_assignment -library "soc_system" -name SYSTEMVERILOG_FILE [file join $::quartus(qip_path) "submodules/soc_system_mm_interconnect_0_rsp_xbar_mux.sv"]
+set_global_assignment -library "soc_system" -name SYSTEMVERILOG_FILE [file join $::quartus(qip_path) "submodules/soc_system_mm_interconnect_0_rsp_xbar_demux.sv"]
+set_global_assignment -library "soc_system" -name SYSTEMVERILOG_FILE [file join $::quartus(qip_path) "submodules/soc_system_mm_interconnect_0_cmd_xbar_mux.sv"]
+set_global_assignment -library "soc_system" -name SYSTEMVERILOG_FILE [file join $::quartus(qip_path) "submodules/soc_system_mm_interconnect_0_cmd_xbar_demux.sv"]
+set_global_assignment -library "soc_system" -name SYSTEMVERILOG_FILE [file join $::quartus(qip_path) "submodules/altera_merlin_burst_adapter.sv"]
+set_global_assignment -library "soc_system" -name SYSTEMVERILOG_FILE [file join $::quartus(qip_path) "submodules/soc_system_mm_interconnect_0_id_router.sv"]
+set_global_assignment -library "soc_system" -name SYSTEMVERILOG_FILE [file join $::quartus(qip_path) "submodules/soc_system_mm_interconnect_0_addr_router.sv"]
+set_global_assignment -library "soc_system" -name VERILOG_FILE [file join $::quartus(qip_path) "submodules/altera_avalon_sc_fifo.v"]
+set_global_assignment -library "soc_system" -name SYSTEMVERILOG_FILE [file join $::quartus(qip_path) "submodules/altera_merlin_slave_agent.sv"]
+set_global_assignment -library "soc_system" -name SYSTEMVERILOG_FILE [file join $::quartus(qip_path) "submodules/altera_merlin_axi_master_ni.sv"]
+set_global_assignment -library "soc_system" -name SYSTEMVERILOG_FILE [file join $::quartus(qip_path) "submodules/altera_merlin_slave_translator.sv"]
+set_global_assignment -library "soc_system" -name SYSTEMVERILOG_FILE [file join $::quartus(qip_path) "submodules/nes.sv"]
+set_global_assignment -library "soc_system" -name VERILOG_FILE [file join $::quartus(qip_path) "submodules/soc_system_hps_0.v"]
+set_global_assignment -library "soc_system" -name VERILOG_FILE [file join $::quartus(qip_path) "submodules/soc_system_hps_0_hps_io.v"]
+set_global_assignment -library "soc_system" -name VERILOG_FILE [file join $::quartus(qip_path) "submodules/hps_sdram.v"]
+set_global_assignment -library "soc_system" -name TCL_FILE [file join $::quartus(qip_path) "submodules/hps_sdram_p0_report_timing.tcl"]
+set_global_assignment -library "soc_system" -name TCL_FILE [file join $::quartus(qip_path) "submodules/hps_sdram_p0_pin_map.tcl"]
+set_global_assignment -library "soc_system" -name SOURCE_FILE [file join $::quartus(qip_path) "submodules/hps_sdram_p0.ppf"]
+set_global_assignment -library "soc_system" -name VERILOG_FILE [file join $::quartus(qip_path) "submodules/altera_mem_if_hhp_qseq_synth_top.v"]
+set_global_assignment -library "soc_system" -name SYSTEMVERILOG_FILE [file join $::quartus(qip_path) "submodules/hps_sdram_pll.sv"]
+set_global_assignment -library "soc_system" -name TCL_FILE [file join $::quartus(qip_path) "submodules/hps_sdram_p0_pin_assignments.tcl"]
+set_global_assignment -library "soc_system" -name VERILOG_FILE [file join $::quartus(qip_path) "submodules/hps_sdram_p0_clock_pair_generator.v"]
+set_global_assignment -library "soc_system" -name VERILOG_FILE [file join $::quartus(qip_path) "submodules/hps_sdram_p0_acv_hard_memphy.v"]
+set_global_assignment -library "soc_system" -name VERILOG_FILE [file join $::quartus(qip_path) "submodules/hps_sdram_p0_acv_hard_io_pads.v"]
+set_global_assignment -library "soc_system" -name SYSTEMVERILOG_FILE [file join $::quartus(qip_path) "submodules/hps_sdram_p0_phy_csr.sv"]
+set_global_assignment -library "soc_system" -name SYSTEMVERILOG_FILE [file join $::quartus(qip_path) "submodules/hps_sdram_p0.sv"]
+set_global_assignment -library "soc_system" -name VERILOG_FILE [file join $::quartus(qip_path) "submodules/hps_sdram_p0_reset_sync.v"]
+set_global_assignment -library "soc_system" -name VERILOG_FILE [file join $::quartus(qip_path) "submodules/hps_sdram_p0_acv_ldc.v"]
+set_global_assignment -library "soc_system" -name SYSTEMVERILOG_FILE [file join $::quartus(qip_path) "submodules/altera_mem_if_dll_cyclonev.sv"]
+set_global_assignment -library "soc_system" -name VERILOG_FILE [file join $::quartus(qip_path) "submodules/hps_sdram_p0_altdqdqs.v"]
+set_global_assignment -library "soc_system" -name VERILOG_FILE [file join $::quartus(qip_path) "submodules/hps_sdram_p0_reset.v"]
+set_global_assignment -library "soc_system" -name VERILOG_FILE [file join $::quartus(qip_path) "submodules/hps_sdram_p0_generic_ddio.v"]
+set_global_assignment -library "soc_system" -name TCL_FILE [file join $::quartus(qip_path) "submodules/hps_sdram_p0_timing.tcl"]
+set_global_assignment -library "soc_system" -name TCL_FILE [file join $::quartus(qip_path) "submodules/hps_sdram_p0_parameters.tcl"]
+set_global_assignment -library "soc_system" -name SYSTEMVERILOG_FILE [file join $::quartus(qip_path) "submodules/altdq_dqs2_acv_connect_to_hard_phy_cyclonev.sv"]
+set_global_assignment -library "soc_system" -name VERILOG_FILE [file join $::quartus(qip_path) "submodules/hps_sdram_p0_acv_hard_addr_cmd_pads.v"]
+set_global_assignment -library "soc_system" -name SYSTEMVERILOG_FILE [file join $::quartus(qip_path) "submodules/altera_mem_if_oct_cyclonev.sv"]
+set_global_assignment -library "soc_system" -name SYSTEMVERILOG_FILE [file join $::quartus(qip_path) "submodules/altera_mem_if_hard_memory_controller_top_cyclonev.sv"]
+set_global_assignment -library "soc_system" -name TCL_FILE [file join $::quartus(qip_path) "submodules/hps_sdram_p0_report_timing_core.tcl"]
+set_global_assignment -library "soc_system" -name SDC_FILE [file join $::quartus(qip_path) "submodules/hps_sdram_p0.sdc"]
+set_instance_assignment -entity "soc_system_hps_0_hps_io_border" -library "soc_system" -name HPS_ISW_FILE [file join $::quartus(qip_path) "submodules/sequencer/sdram_io.pre.h"]
+set_global_assignment -library "soc_system" -name MISC_FILE [file join $::quartus(qip_path) "submodules/sequencer/sdram_io.pre.h"]
+set_instance_assignment -entity "soc_system_hps_0_hps_io_border" -library "soc_system" -name HPS_ISW_FILE [file join $::quartus(qip_path) "submodules/sequencer/system.pre.h"]
+set_global_assignment -library "soc_system" -name MISC_FILE [file join $::quartus(qip_path) "submodules/sequencer/system.pre.h"]
+set_instance_assignment -entity "soc_system_hps_0_hps_io_border" -library "soc_system" -name HPS_ISW_FILE [file join $::quartus(qip_path) "submodules/sequencer/sequencer_auto_ac_init.pre.c"]
+set_global_assignment -library "soc_system" -name MISC_FILE [file join $::quartus(qip_path) "submodules/sequencer/sequencer_auto_ac_init.pre.c"]
+set_instance_assignment -entity "soc_system_hps_0_hps_io_border" -library "soc_system" -name HPS_ISW_FILE [file join $::quartus(qip_path) "submodules/sequencer/emif.pre.xml"]
+set_global_assignment -library "soc_system" -name MISC_FILE [file join $::quartus(qip_path) "submodules/sequencer/emif.pre.xml"]
+set_instance_assignment -entity "soc_system_hps_0_hps_io_border" -library "soc_system" -name HPS_ISW_FILE [file join $::quartus(qip_path) "submodules/sequencer/alt_types.pre.h"]
+set_global_assignment -library "soc_system" -name MISC_FILE [file join $::quartus(qip_path) "submodules/sequencer/alt_types.pre.h"]
+set_instance_assignment -entity "soc_system_hps_0_hps_io_border" -library "soc_system" -name HPS_ISW_FILE [file join $::quartus(qip_path) "submodules/sequencer/sequencer_auto.pre.h"]
+set_global_assignment -library "soc_system" -name MISC_FILE [file join $::quartus(qip_path) "submodules/sequencer/sequencer_auto.pre.h"]
+set_instance_assignment -entity "soc_system_hps_0_hps_io_border" -library "soc_system" -name HPS_ISW_FILE [file join $::quartus(qip_path) "submodules/sequencer/sequencer.pre.h"]
+set_global_assignment -library "soc_system" -name MISC_FILE [file join $::quartus(qip_path) "submodules/sequencer/sequencer.pre.h"]
+set_instance_assignment -entity "soc_system_hps_0_hps_io_border" -library "soc_system" -name HPS_ISW_FILE [file join $::quartus(qip_path) "submodules/sequencer/sequencer_defines.pre.h"]
+set_global_assignment -library "soc_system" -name MISC_FILE [file join $::quartus(qip_path) "submodules/sequencer/sequencer_defines.pre.h"]
+set_instance_assignment -entity "soc_system_hps_0_hps_io_border" -library "soc_system" -name HPS_ISW_FILE [file join $::quartus(qip_path) "submodules/sequencer/sequencer_auto_inst_init.pre.c"]
+set_global_assignment -library "soc_system" -name MISC_FILE [file join $::quartus(qip_path) "submodules/sequencer/sequencer_auto_inst_init.pre.c"]
+set_instance_assignment -entity "soc_system_hps_0_hps_io_border" -library "soc_system" -name HPS_ISW_FILE [file join $::quartus(qip_path) "submodules/sequencer/tclrpt.pre.h"]
+set_global_assignment -library "soc_system" -name MISC_FILE [file join $::quartus(qip_path) "submodules/sequencer/tclrpt.pre.h"]
+set_instance_assignment -entity "soc_system_hps_0_hps_io_border" -library "soc_system" -name HPS_ISW_FILE [file join $::quartus(qip_path) "submodules/sequencer/tclrpt.pre.c"]
+set_global_assignment -library "soc_system" -name MISC_FILE [file join $::quartus(qip_path) "submodules/sequencer/tclrpt.pre.c"]
+set_instance_assignment -entity "soc_system_hps_0_hps_io_border" -library "soc_system" -name HPS_ISW_FILE [file join $::quartus(qip_path) "submodules/sequencer/sequencer.pre.c"]
+set_global_assignment -library "soc_system" -name MISC_FILE [file join $::quartus(qip_path) "submodules/sequencer/sequencer.pre.c"]
+set_global_assignment -library "soc_system" -name VERILOG_FILE [file join $::quartus(qip_path) "submodules/hps_sdram_p0_iss_probe.v"]
+set_global_assignment -library "soc_system" -name SYSTEMVERILOG_FILE [file join $::quartus(qip_path) "submodules/soc_system_hps_0_hps_io_border.sv"]
+set_instance_assignment -entity "soc_system_hps_0_hps_io_border" -library "soc_system" -name HPS_ISW_FILE [file join $::quartus(qip_path) "submodules/hps.pre.xml"]
+set_global_assignment -library "soc_system" -name MISC_FILE [file join $::quartus(qip_path) "submodules/hps.pre.xml"]
+set_global_assignment -library "soc_system" -name SYSTEMVERILOG_FILE [file join $::quartus(qip_path) "submodules/soc_system_hps_0_fpga_interfaces.sv"]
+
+set_global_assignment -entity "altera_reset_controller" -library "soc_system" -name IP_TOOL_NAME "altera_reset_controller"
+set_global_assignment -entity "altera_reset_controller" -library "soc_system" -name IP_TOOL_VERSION "13.1"
+set_global_assignment -entity "altera_reset_controller" -library "soc_system" -name IP_TOOL_ENV "Qsys"
+set_global_assignment -entity "soc_system_mm_interconnect_0" -library "soc_system" -name IP_TOOL_NAME "altera_merlin_interconnect_wrapper"
+set_global_assignment -entity "soc_system_mm_interconnect_0" -library "soc_system" -name IP_TOOL_VERSION "13.1"
+set_global_assignment -entity "soc_system_mm_interconnect_0" -library "soc_system" -name IP_TOOL_ENV "Qsys"
+set_global_assignment -entity "altera_merlin_width_adapter" -library "soc_system" -name IP_TOOL_NAME "altera_merlin_width_adapter"
+set_global_assignment -entity "altera_merlin_width_adapter" -library "soc_system" -name IP_TOOL_VERSION "13.1"
+set_global_assignment -entity "altera_merlin_width_adapter" -library "soc_system" -name IP_TOOL_ENV "Qsys"
+set_global_assignment -entity "soc_system_mm_interconnect_0_rsp_xbar_mux" -library "soc_system" -name IP_TOOL_NAME "altera_merlin_multiplexer"
+set_global_assignment -entity "soc_system_mm_interconnect_0_rsp_xbar_mux" -library "soc_system" -name IP_TOOL_VERSION "13.1"
+set_global_assignment -entity "soc_system_mm_interconnect_0_rsp_xbar_mux" -library "soc_system" -name IP_TOOL_ENV "Qsys"
+set_global_assignment -entity "soc_system_mm_interconnect_0_rsp_xbar_demux" -library "soc_system" -name IP_TOOL_NAME "altera_merlin_demultiplexer"
+set_global_assignment -entity "soc_system_mm_interconnect_0_rsp_xbar_demux" -library "soc_system" -name IP_TOOL_VERSION "13.1"
+set_global_assignment -entity "soc_system_mm_interconnect_0_rsp_xbar_demux" -library "soc_system" -name IP_TOOL_ENV "Qsys"
+set_global_assignment -entity "soc_system_mm_interconnect_0_cmd_xbar_mux" -library "soc_system" -name IP_TOOL_NAME "altera_merlin_multiplexer"
+set_global_assignment -entity "soc_system_mm_interconnect_0_cmd_xbar_mux" -library "soc_system" -name IP_TOOL_VERSION "13.1"
+set_global_assignment -entity "soc_system_mm_interconnect_0_cmd_xbar_mux" -library "soc_system" -name IP_TOOL_ENV "Qsys"
+set_global_assignment -entity "soc_system_mm_interconnect_0_cmd_xbar_demux" -library "soc_system" -name IP_TOOL_NAME "altera_merlin_demultiplexer"
+set_global_assignment -entity "soc_system_mm_interconnect_0_cmd_xbar_demux" -library "soc_system" -name IP_TOOL_VERSION "13.1"
+set_global_assignment -entity "soc_system_mm_interconnect_0_cmd_xbar_demux" -library "soc_system" -name IP_TOOL_ENV "Qsys"
+set_global_assignment -entity "altera_merlin_burst_adapter" -library "soc_system" -name IP_TOOL_NAME "altera_merlin_burst_adapter"
+set_global_assignment -entity "altera_merlin_burst_adapter" -library "soc_system" -name IP_TOOL_VERSION "13.1"
+set_global_assignment -entity "altera_merlin_burst_adapter" -library "soc_system" -name IP_TOOL_ENV "Qsys"
+set_global_assignment -entity "soc_system_mm_interconnect_0_id_router" -library "soc_system" -name IP_TOOL_NAME "altera_merlin_router"
+set_global_assignment -entity "soc_system_mm_interconnect_0_id_router" -library "soc_system" -name IP_TOOL_VERSION "13.1"
+set_global_assignment -entity "soc_system_mm_interconnect_0_id_router" -library "soc_system" -name IP_TOOL_ENV "Qsys"
+set_global_assignment -entity "soc_system_mm_interconnect_0_addr_router" -library "soc_system" -name IP_TOOL_NAME "altera_merlin_router"
+set_global_assignment -entity "soc_system_mm_interconnect_0_addr_router" -library "soc_system" -name IP_TOOL_VERSION "13.1"
+set_global_assignment -entity "soc_system_mm_interconnect_0_addr_router" -library "soc_system" -name IP_TOOL_ENV "Qsys"
+set_global_assignment -entity "altera_avalon_sc_fifo" -library "soc_system" -name IP_TOOL_NAME "altera_avalon_sc_fifo"
+set_global_assignment -entity "altera_avalon_sc_fifo" -library "soc_system" -name IP_TOOL_VERSION "13.1"
+set_global_assignment -entity "altera_avalon_sc_fifo" -library "soc_system" -name IP_TOOL_ENV "Qsys"
+set_global_assignment -entity "altera_merlin_slave_agent" -library "soc_system" -name IP_TOOL_NAME "altera_merlin_slave_agent"
+set_global_assignment -entity "altera_merlin_slave_agent" -library "soc_system" -name IP_TOOL_VERSION "13.1"
+set_global_assignment -entity "altera_merlin_slave_agent" -library "soc_system" -name IP_TOOL_ENV "Qsys"
+set_global_assignment -entity "altera_merlin_axi_master_ni" -library "soc_system" -name IP_TOOL_NAME "altera_merlin_axi_master_ni"
+set_global_assignment -entity "altera_merlin_axi_master_ni" -library "soc_system" -name IP_TOOL_VERSION "13.1"
+set_global_assignment -entity "altera_merlin_axi_master_ni" -library "soc_system" -name IP_TOOL_ENV "Qsys"
+set_global_assignment -entity "altera_merlin_slave_translator" -library "soc_system" -name IP_TOOL_NAME "altera_merlin_slave_translator"
+set_global_assignment -entity "altera_merlin_slave_translator" -library "soc_system" -name IP_TOOL_VERSION "13.1"
+set_global_assignment -entity "altera_merlin_slave_translator" -library "soc_system" -name IP_TOOL_ENV "Qsys"
+set_global_assignment -entity "soc_system_hps_0" -library "soc_system" -name IP_TOOL_NAME "altera_hps"
+set_global_assignment -entity "soc_system_hps_0" -library "soc_system" -name IP_TOOL_VERSION "13.1"
+set_global_assignment -entity "soc_system_hps_0" -library "soc_system" -name IP_TOOL_ENV "Qsys"
+set_global_assignment -entity "soc_system_hps_0_hps_io" -library "soc_system" -name IP_TOOL_NAME "altera_hps_io"
+set_global_assignment -entity "soc_system_hps_0_hps_io" -library "soc_system" -name IP_TOOL_VERSION "13.1"
+set_global_assignment -entity "soc_system_hps_0_hps_io" -library "soc_system" -name IP_TOOL_ENV "Qsys"
