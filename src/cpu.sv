@@ -229,7 +229,7 @@ module cpu (
 
 		    ABSY2:	 ADH <= alu_out;
 
-          INDY3:   ADH <= alu_out;
+          INDY2:   ADH <= alu_out;
 
           default: ADH <= ADH;
         endcase;
@@ -243,12 +243,25 @@ module cpu (
             INDX2: BAL <= alu_out;
             INDX3: BAL <= alu_out;
 
-            INDY1: BAL <= alu_out;
+            INDY2: BAL <= alu_out;
 
             ZPX1:  BAL <= alu_out;
          endcase
       end
 
+
+   logic [7:0] IAL;
+   always_ff @ (posedge clk)
+      begin
+         case (state)
+
+            INDY1: IAL <= alu_out;
+
+
+
+
+         endcase
+      end
    /*
     * Address Output
     */
@@ -278,7 +291,7 @@ module cpu (
 
         ZPX3:   addr = {8'b0, BAL};
 
-          default: addr = PC;
+        default: addr = PC;
         endcase;
      end
 
@@ -375,8 +388,8 @@ module cpu (
           default: state <= FETCH;
         endcase;
 
-        $display("sync:%b addr:%x d_in:%x A:%x X:%x Y:%x a:%x b:%x: out:%x P:%x BAL:%x Carry:%d",
-                 sync, addr, d_in, A, X, Y, alu_a, alu_b, alu_out, P, BAL, P[0]);
+        $display("sync:%b addr:%x d_in:%x A:%x X:%x Y:%x a:%x b:%x: out:%x P:%x BAL:%x Carry:%d ADL:%x ADH:%x",
+                 sync, addr, d_in, A, X, Y, alu_a, alu_b, alu_out, P, BAL, P[0], ADL, ADH);
      end
 
 
