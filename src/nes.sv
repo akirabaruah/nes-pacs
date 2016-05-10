@@ -53,32 +53,35 @@ memory mem (
 always_ff @(posedge clk) begin
    case (nes_op)
       RESET_CPU: begin
-         mem_write <= 0;
          cpu_ready <= 0;
          cpu_reset <= 1;
          end
       WRITE_MEM: begin
-         mem_write <= 1;
          cpu_ready <= 0;
+         mem_write <= 1;
          mem_addr <= address;
          mem_in <= d_in;
          end
       PAUSE_CPU: begin
-         mem_write <= 0;
          cpu_ready <= 0;
          cpu_reset <= 0;
          end
       START_CPU: begin
-         mem_write <= 0;
          cpu_ready <= 1;
          cpu_reset <= 0;
-         cpu_addr <= address;
+         mem_in <= d_out;
+         mem_write <= cpu_write;
+         d_in <= mem_out;
+         mem_addr <= cpu_addr;
          end
       default: begin             // keep running CPU
          mem_write <= 0;
          cpu_ready <= 1;
          cpu_reset <= 0;
-         cpu_addr <= cpu_addr+1;
+         mem_in <= d_out;
+         mem_write <= cpu_write;
+         d_in <= mem_out;
+         mem_addr <= cpu_addr;
          end
    endcase
 
