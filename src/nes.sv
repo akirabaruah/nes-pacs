@@ -72,15 +72,18 @@ always_ff @(posedge clk) begin
          cpu_ready <= 0;
          cpu_reset <= 1;
          end
+
       WRITE_MEM: begin
          cpu_ready <= 0;
          mem_write <= 1;
          mem_addr <= address;
          mem_in <= d_in;
          end
+
       PAUSE_CPU: begin
          cpu_ready <= 0;
          cpu_reset <= 0;
+      
       START_CPU: begin
          cpu_ready <= 1;
          cpu_reset <= 0;
@@ -89,6 +92,7 @@ always_ff @(posedge clk) begin
          mem_write <= cpu_write;
          mem_addr <= cpu_addr;
          end
+      
       default: begin             // keep running CPU
          cpu_ready <= 1;
          cpu_reset <= 0;
@@ -100,7 +104,6 @@ always_ff @(posedge clk) begin
    endcase
 
    readdata <= d_out;
-
    $display("nes_op:%d  d_in:%b  addr:%x  d_out:%b",
       nes_op, d_in, addr, d_out);
 end
