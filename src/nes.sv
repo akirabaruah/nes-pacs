@@ -1,7 +1,7 @@
 parameter
    RESET_CPU = 8'd0,
    START_CPU = 8'd1,
-   PAUSE_CPU = 8'd2
+   PAUSE_CPU = 8'd2,
    WRITE_MEM = 8'd3,
 ;
 
