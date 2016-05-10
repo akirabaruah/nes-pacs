@@ -40,31 +40,17 @@ parameter
 
 
 module cpu (
-            input clk,
-            input reset,
-            input ready,
-            input irq,
-            input nmi,
-            input [7:0] d_in,
-            output write,
-            output sync,
-            output [7:0] d_out,
+            input         clk,
+            input         reset,
+            input         ready,
+            input         irq,
+            input         nmi,
+            input [7:0]   d_in,
+            output        write,
+            output        sync,
+            output [7:0]  d_out,
             output [15:0] addr
             );
-
-   /*
-    * Registers
-    */
-
-   logic [7:0] A,     // accumulator
-               X,     // X index
-               Y,     // Y index
-               D_OUT, // data output
-               IR,    // instruction register
-               P,     // processor status
-               SP,    // stack pointer
-               ADL,   // address low
-               ADH;   // address high
 
    /*
     * Instruction Fields
@@ -77,11 +63,41 @@ module cpu (
 
    assign {aaa, bbb, cc} = IR;
    assign opcode = {aaa, cc};
-	assign t1op = {d_in[7:5], d_in[1:0]};
+   assign t1op = {d_in[7:5], d_in[1:0]};
+
+   /*
+	* Arith control signal
+	*/
+
+   logic arith;
+   always_comb begin
+	  case (aaa)
+		LDA: 		arith = 0;
+
+		ORA:		arith = 1;
+		AND:		arith = 1;
+		EOR:		arith = 1;
+		ADC:		arith = 1;
+		SBC:		arith = 1;
+		default: arith = 0;
+	  endcase
+   end
 
 
+   /*
+    * Registers
+    */
 
-   logic [15:0] PC;   // program counter
+   logic [7:0]            A,     // accumulator
+                          X,     // X index
+                          Y,     // Y index
+                          D_OUT, // data output
+                          IR,    // instruction register
+                          P,     // processor status
+                          SP,    // stack pointer
+                          ADL,   // address low
+                          ADH;   // address high
+   logic [15:0]           PC;    // program counter
 
    /*
     * Instruction Register
@@ -93,42 +109,20 @@ module cpu (
           IR <= d_in;
      end
 
-
-	logic arith;
-	always_comb begin
-		case (aaa)
-				LDA: 		arith = 0;
-
-				ORA:		arith = 1;
-				AND:		arith = 1;
-				EOR:		arith = 1;
-				ADC:		arith = 1;
-				SBC:		arith = 1;
-				default: arith = 0;
-		endcase
-	end
-			
-
-
-
    /*
     * Accumulator
     */
-//  ORA, AND, EOR, ADC, SBC
+   //  ORA, AND, EOR, ADC, SBC
 
    always_ff @ (posedge clk)
      begin
         case (state)
-			 DECODE:
-				case (aaa)
-					default: A <= A;
-				endcase
-			 FETCH:
-				if (arith)
-					A <= alu_out;
-				else
-					A <= d_in;
-			 default: 		A <= A;
+		  DECODE:
+			case (aaa)
+			  default: A <= A;
+			endcase
+		  FETCH: A <= arith ? alu_out : d_in;
+		  default: 		A <= A;
         endcase;
      end
 
@@ -169,12 +163,24 @@ module cpu (
     * Program Counter
     */
 
-   logic pc_hold = 0;
    always_ff @ (posedge clk)
      begin
-        if (!pc_hold) begin
-           PC <= PC + 1;
-        end
+        case (state)
+		  ABS2,
+        INDX1,
+        INDX2,
+        INDX3,
+        INDX4,
+		  ABSY2,
+		  ABSY3,
+		  ABSX2,
+		  ABSX3,
+        ZPX1,
+        ZPX2,
+        ZPX3,
+		  ZP1:     PC <= PC;
+		  default: PC <= PC + 1;
+        endcase
      end
 
    /*
@@ -184,8 +190,17 @@ module cpu (
    always_ff @ (posedge clk)
      begin
         case (state)
-          ABS1:    ADL <= d_in;
-          default: ADL <= 0;
+        ABS1:   ADL <= d_in;
+
+        INDX3:  ADL <= d_in;
+
+		  ZP1:	 ADL <= d_in;
+
+		  ABSX1:	 ADL <= alu_out;
+
+		  ABSY1:	 ADL <= alu_out;
+
+          default: ADL <= ADL;
         endcase;
      end
 
@@ -197,7 +212,52 @@ module cpu (
      begin
         case (state)
           ABS2:    ADH <= d_in;
-          default: ADH <= 0;
+
+		    ABSX2:	 ADH <= alu_out;
+
+		    ABSY2:	 ADH <= alu_out;
+
+          default: ADH <= ADH;
+        endcase;
+     end
+
+   logic [7:0] BAL;
+   always_ff @ (posedge clk)
+      begin
+         case (state)
+            INDX1: BAL <= alu_out;
+            INDX2: BAL <= alu_out;
+            INDX3: BAL <= alu_out;
+
+            ZPX1:  BAL <= alu_out;
+         endcase
+      end
+
+   /*
+    * Address Output
+    */
+
+   always_comb
+     begin
+        case (state)
+         
+        ABS2:   addr = {d_in, ADL};
+   
+        INDX2:  addr = {8'b0, BAL};
+        INDX3:  addr = {8'b0, BAL};
+        INDX4:  addr = {d_in, ADL};
+
+		  ABSX2:	 addr = {d_in, ADL};
+		  ABSX3:	 addr = {ADH, ADL};
+
+		  ABSY2:	 addr = {d_in, ADL};
+		  ABSY3:	 addr = {ADH, ADL};
+
+		  ZP1:    addr = {8'b0, d_in};
+
+        ZPX3:   addr = {8'b0, BAL};
+
+          default: addr = PC;
         endcase;
      end
 
@@ -211,8 +271,28 @@ module cpu (
          FETCH,  // TX (final state of instruction)
 
          ABS1,
-         ABS2
-         } state;
+         ABS2,
+
+  		   ABSX1,
+		   ABSX2,
+		   ABSX3,
+
+         ABSY1,
+		   ABSY2,
+		   ABSY3,
+
+         INDX1,
+         INDX2,
+         INDX3,
+         INDX4,
+
+         ZPX1,
+         ZPX2,
+         ZPX3,
+
+		   ZP1
+         
+			} state;
 
    initial state = FETCH;
 
@@ -225,32 +305,48 @@ module cpu (
                8'bxxx01101,
                8'bxxx01110,
                8'bxxx01100: state <= ABS1;  // Absolute
+               8'bxxx00101: state <= ZP1;   // Zero Page
+               8'bxxx11101: state <= ABSX1; // Absolute X
+               8'bxxx11001: state <= ABSY1; // Absolute Y
+               8'bxxx00001: state <= INDX1; // Indirect, X
+               8'bxxx10101: state <= ZPX1;  // Zero Page X
+
                default:     state <= FETCH; // Immediate
              endcase
           end
 
+          INDX1:  state <= INDX2;
+          INDX2:  state <= INDX3;
+          INDX3:  state <= INDX4;
+          INDX4:  state <= FETCH;
+
           ABS1:    state <= ABS2;
           ABS2:    state <= FETCH;
+
+          ABSX1:   state <= ABSX2;
+          ABSX2:   state <= P[0] ? ABSX3 : FETCH;
+          ABSX3:   state <= FETCH;
+
+
+          ABSY1:   state <= ABSY2;
+          ABSY2:   state <= P[0] ? ABSY3 : FETCH;
+          ABSY3:   state <= FETCH;
+
+  		    ZP1:     state <= FETCH;
+
+          ZPX1:    state <= ZPX2;
+          ZPX2:    state <= ZPX3;
+          ZPX3:    state <= FETCH;
+         
 
           default: state <= FETCH;
         endcase;
 
-        $display("sync:%b addr:%x d_in:%x A:%x X:%x Y:%x a:%x b:%x: out:%x P:%x",
-                 sync, addr, d_in, A, X, Y, alu_a, alu_b, alu_out, P);
+        $display("sync:%b addr:%x d_in:%x A:%x X:%x Y:%x a:%x b:%x: out:%x P:%x BAL:%x",
+                 sync, addr, d_in, A, X, Y, alu_a, alu_b, alu_out, P, BAL);
      end
 
 
-   /*
-    * Address Output
-    */
-
-   always_comb
-     begin
-        case (state)
-          ABS2:    addr = {d_in, ADL};
-          default: addr = PC;
-        endcase;
-     end
 
    /*
     * alu_a, alu_b control
@@ -259,7 +355,20 @@ module cpu (
    always_comb
      begin
         case (state)
-          FETCH:   alu_a = dbus;
+
+        INDX1: alu_a = X;
+        INDX2: alu_a = BAL;
+
+		  ABSX1: alu_a = X;
+		  ABSX3: alu_a = ADH;
+
+        ABSY1: alu_a = Y;
+        ABSY3: alu_a = ADH;
+
+        ZPX1:  alu_a = X;
+
+		  FETCH: alu_a = arith ? A : d_in;
+
           default: alu_a = 0;
         endcase;
      end
@@ -267,27 +376,35 @@ module cpu (
    always_comb
      begin
         case (state)
+
+        INDX1:  alu_b = d_in; // ADL 
+        INDX2:  alu_b = 1;
+
+		  ABSX1:	 alu_b = d_in; // ADL
+		  ABSX3:	 alu_b = P[0];
+
+        ABSY1:  alu_b = d_in; // ADL
+        ABSY3:  alu_b = P[0];
+
+        ZPX1:   alu_b = d_in;
+
+		  FETCH:	 alu_b = d_in;
           default: alu_b = d_in;
         endcase;
      end
 
-
    /*
-    * Data Bus
+    * ALU carry in
     */
 
-   logic [7:0] dbus;
    always_comb
      begin
-		case (state)
-			FETCH:
-				if (arith)
-					dbus = A; 
-				else
-					dbus = d_in;
-		endcase
+        case (state)
+          ABSX2:   cin = P[0];
+          ABSY2:   cin = P[0];
+          default: cin = 0;
+        endcase
      end
-
 
    /*
     * ALU
@@ -295,12 +412,12 @@ module cpu (
 
    logic [7:0] alu_a, alu_b, alu_out;
    logic [4:0] alu_mode;
-   logic cout, over, zero, sign;
+   logic       cin, cout, over, zero, sign;
    alu ALU(
 		   .alu_a(alu_a),
 	       .alu_b(alu_b),
 		   .mode(alu_mode),
-	       .carry_in(0),
+	       .carry_in(cin),
 	       .alu_out(alu_out),
 	       .carry_out(cout),
 		   .overflow(over),
