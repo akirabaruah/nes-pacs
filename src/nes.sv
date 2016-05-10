@@ -7,29 +7,29 @@ parameter
 
 module nes (
    input logic clk,
-   input logic reset,               // obsolete
-   input logic chipselect,          // ??
-   input logic read,                // obsolete
-   input logic write,               // obsolete
+   input logic reset,                     // obsolete
+   input logic chipselect,                // ??
+   input logic read,                      // obsolete
+   input logic write,                     // obsolete
    input logic [15:0] writedata,
    input logic [15:0] address,
    output logic [7:0] readdata,
-   output [14:0] hps_memory_mem_a,
-   output [2:0]  hps_memory_mem_ba,
-   output        hps_memory_mem_ck,
-   output        hps_memory_mem_ck_n,
-   output        hps_memory_mem_cke,
-   output        hps_memory_mem_cs_n,
-   output        hps_memory_mem_ras_n,
-   output        hps_memory_mem_cas_n,
-   output        hps_memory_mem_we_n,
-   output        hps_memory_mem_reset_n,
-   inout  [39:0] hps_memory_mem_dq,
-   inout  [4:0]  hps_memory_mem_dqs,
-   inout  [4:0]  hps_memory_mem_dqs_n,
-   output        hps_memory_mem_odt,
-   output [4:0]  hps_memory_mem_dm,
-   input         hps_memory_oct_rzqin
+   output logic [14:0] hps_memory_mem_a,
+   output logic[2:0]  hps_memory_mem_ba,
+   output logic hps_memory_mem_ck,
+   output logic hps_memory_mem_ck_n,
+   output logic hps_memory_mem_cke,
+   output logic hps_memory_mem_cs_n,
+   output logic hps_memory_mem_ras_n,
+   output logic hps_memory_mem_cas_n,
+   output logic hps_memory_mem_we_n,
+   output logic hps_memory_mem_reset_n,
+   inout [39:0] hps_memory_mem_dq,        // inout??
+   inout [4:0]  hps_memory_mem_dqs,       // inout??
+   inout [4:0]  hps_memory_mem_dqs_n,     // inout??
+   output logic hps_memory_mem_odt,
+   output logic [4:0] hps_memory_mem_dm,
+   input logic hps_memory_oct_rzqin
 );
 
 logic zero = 0;
