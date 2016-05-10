@@ -63,7 +63,7 @@ module cpu (
 
    assign {aaa, bbb, cc} = IR;
    assign opcode = {aaa, cc};
-   assign t1op = {d_in[7:5], d_in[1:0]};
+   //assign t1op = {d_in[7:5], d_in[1:0]};
 
    /*
 	* Arith control signal

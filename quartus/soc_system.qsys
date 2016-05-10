@@ -6,9 +6,20 @@
    version="1.0"
    description=""
    tags=""
-   categories="" />
+   categories="System" />
  <parameter name="bonusData"><![CDATA[bonusData 
 {
+   element $${FILENAME}
+   {
+   }
+   element nes_emu_0.avalon_slave_0
+   {
+      datum baseAddress
+      {
+         value = "0";
+         type = "String";
+      }
+   }
    element clk_0
    {
       datum _sortIndex
@@ -25,7 +36,7 @@
          type = "int";
       }
    }
-   element nes_0
+   element nes_emu_0
    {
       datum _sortIndex
       {
@@ -45,14 +56,13 @@
  <parameter name="globalResetBus" value="false" />
  <parameter name="hdlLanguage" value="VERILOG" />
  <parameter name="maxAdditionalLatency" value="1" />
- <parameter name="projectName" value="" />
+ <parameter name="projectName" value="nes.qpf" />
  <parameter name="sopcBorderPoints" value="false" />
  <parameter name="systemHash" value="0" />
  <parameter name="timeStamp" value="0" />
  <parameter name="useTestBenchNamingPattern" value="false" />
  <instanceScript></instanceScript>
  <interface name="clk" internal="clk_0.clk_in" type="clock" dir="end" />
- <interface name="reset" internal="clk_0.clk_in_reset" type="reset" dir="end" />
  <interface name="memory" internal="hps_0.memory" type="conduit" dir="end" />
  <module kind="clock_source" version="13.1" enabled="1" name="clk_0">
   <parameter name="clockFrequency" value="50000000" />
@@ -520,19 +530,30 @@
   <parameter name="quartus_ini_hps_ip_enable_bsel_csel" value="false" />
   <parameter name="quartus_ini_hps_ip_f2sdram_bonding_out" value="false" />
  </module>
- <module kind="nes" version="1.0" enabled="1" name="nes_0" />
+ <module kind="nes_emu" version="1.0" enabled="1" name="nes_emu_0">
+  <parameter name="AUTO_CLOCK_CLOCK_RATE" value="50000000" />
+ </module>
  <connection
    kind="clock"
    version="13.1"
    start="clk_0.clk"
    end="hps_0.h2f_lw_axi_clock" />
- <connection kind="clock" version="13.1" start="clk_0.clk" end="nes_0.clock" />
- <connection kind="reset" version="13.1" start="clk_0.clk_reset" end="nes_0.reset" />
+ <connection
+   kind="reset"
+   version="13.1"
+   start="hps_0.h2f_reset"
+   end="clk_0.clk_in_reset" />
+ <connection kind="clock" version="13.1" start="clk_0.clk" end="nes_emu_0.clock" />
+ <connection
+   kind="reset"
+   version="13.1"
+   start="clk_0.clk_reset"
+   end="nes_emu_0.reset_sink" />
  <connection
    kind="avalon"
    version="13.1"
    start="hps_0.h2f_lw_axi_master"
-   end="nes_0.avalon_slave_0">
+   end="nes_emu_0.avalon_slave_0">
   <parameter name="arbitrationPriority" value="1" />
   <parameter name="baseAddress" value="0x0000" />
   <parameter name="defaultConnection" value="false" />
