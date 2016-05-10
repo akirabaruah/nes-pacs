@@ -167,17 +167,27 @@ module cpu (
      begin
         case (state)
 		  ABS2,
+
         INDX1,
         INDX2,
         INDX3,
         INDX4,
+
+        INDY1,
+        INDY2,
+        INDY3,
+        INDY4,
+
 		  ABSY2,
 		  ABSY3,
+
 		  ABSX2,
 		  ABSX3,
+
         ZPX1,
         ZPX2,
         ZPX3,
+
 		  ZP1:     PC <= PC;
 		  default: PC <= PC + 1;
         endcase
@@ -193,6 +203,8 @@ module cpu (
         ABS1:   ADL <= d_in;
 
         INDX3:  ADL <= d_in;
+
+        INDY2:  ADL <= alu_out;
 
 		  ZP1:	 ADL <= d_in;
 
@@ -217,6 +229,8 @@ module cpu (
 
 		    ABSY2:	 ADH <= alu_out;
 
+          INDY3:   ADH <= alu_out;
+
           default: ADH <= ADH;
         endcase;
      end
@@ -228,6 +242,8 @@ module cpu (
             INDX1: BAL <= alu_out;
             INDX2: BAL <= alu_out;
             INDX3: BAL <= alu_out;
+
+            INDY1: BAL <= alu_out;
 
             ZPX1:  BAL <= alu_out;
          endcase
@@ -246,6 +262,11 @@ module cpu (
         INDX2:  addr = {8'b0, BAL};
         INDX3:  addr = {8'b0, BAL};
         INDX4:  addr = {d_in, ADL};
+
+        INDY1:  addr = {8'b0, d_in};
+        INDY2:  addr = {8'b0, BAL};
+        INDY3:  addr = {d_in, ADL};
+        INDY4:  addr = {ADH, ADL};
 
 		  ABSX2:	 addr = {d_in, ADL};
 		  ABSX3:	 addr = {ADH, ADL};
@@ -286,6 +307,12 @@ module cpu (
          INDX3,
          INDX4,
 
+         INDY1,
+         INDY2,
+         INDY3,
+         INDY4,
+
+
          ZPX1,
          ZPX2,
          ZPX3,
@@ -309,6 +336,7 @@ module cpu (
                8'bxxx11101: state <= ABSX1; // Absolute X
                8'bxxx11001: state <= ABSY1; // Absolute Y
                8'bxxx00001: state <= INDX1; // Indirect, X
+               8'bxxx10001: state <= INDY1; // Indirect, Y
                8'bxxx10101: state <= ZPX1;  // Zero Page X
 
                default:     state <= FETCH; // Immediate
@@ -319,6 +347,11 @@ module cpu (
           INDX2:  state <= INDX3;
           INDX3:  state <= INDX4;
           INDX4:  state <= FETCH;
+
+          INDY1:  state <= INDY2;
+          INDY2:  state <= P[0] ? INDY3 : INDY4;
+          INDY3:  state <= INDY4;
+          INDY4:  state <= FETCH;
 
           ABS1:    state <= ABS2;
           ABS2:    state <= FETCH;
@@ -342,8 +375,8 @@ module cpu (
           default: state <= FETCH;
         endcase;
 
-        $display("sync:%b addr:%x d_in:%x A:%x X:%x Y:%x a:%x b:%x: out:%x P:%x BAL:%x",
-                 sync, addr, d_in, A, X, Y, alu_a, alu_b, alu_out, P, BAL);
+        $display("sync:%b addr:%x d_in:%x A:%x X:%x Y:%x a:%x b:%x: out:%x P:%x BAL:%x Carry:%d",
+                 sync, addr, d_in, A, X, Y, alu_a, alu_b, alu_out, P, BAL, P[0]);
      end
 
 
@@ -358,6 +391,10 @@ module cpu (
 
         INDX1: alu_a = X;
         INDX2: alu_a = BAL;
+
+        INDY1: alu_a = 1;
+        INDY2: alu_a = Y;
+        INDY3: alu_a = ADH;
 
 		  ABSX1: alu_a = X;
 		  ABSX3: alu_a = ADH;
@@ -380,6 +417,10 @@ module cpu (
         INDX1:  alu_b = d_in; // ADL 
         INDX2:  alu_b = 1;
 
+        INDY1:  alu_b = d_in; // BAL
+        INDY2:  alu_b = d_in; // ADL
+        INDY3:  alu_b = P[0];
+
 		  ABSX1:	 alu_b = d_in; // ADL
 		  ABSX3:	 alu_b = P[0];
 
@@ -400,8 +441,13 @@ module cpu (
    always_comb
      begin
         case (state)
+
           ABSX2:   cin = P[0];
           ABSY2:   cin = P[0];
+
+          INDY2:   cin = P[0];
+          INDY3:   cin = P[0];
+
           default: cin = 0;
         endcase
      end
