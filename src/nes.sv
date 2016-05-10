@@ -83,6 +83,7 @@ always_ff @(posedge clk) begin
       PAUSE_CPU: begin
          cpu_ready <= 0;
          cpu_reset <= 0;
+         end
       
       START_CPU: begin
          cpu_ready <= 1;
@@ -104,7 +105,7 @@ always_ff @(posedge clk) begin
    endcase
 
    readdata <= d_out;
-   $display("nes_op:%d  d_in:%b  addr:%x  d_out:%b", 
+   $display("nes_op:%d  d_in:%b  addr:%x  d_out:%b\n", 
       nes_op, d_in, addr, d_out);
 end
 
