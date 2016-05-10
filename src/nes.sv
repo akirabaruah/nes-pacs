@@ -2,7 +2,7 @@ parameter
    RESET_CPU = 8'd0,
    START_CPU = 8'd1,
    PAUSE_CPU = 8'd2,
-   WRITE_MEM = 8'd3,
+   WRITE_MEM = 8'd3
 ;
 
 module nes (
@@ -40,7 +40,7 @@ logic [15:0] cpu_addr, mem_addr;
 logic [7:0] d_in, d_out, mem_in, mem_out;
 logic [7:0] nes_op;                       // our own NES opcodes
 
-assign d_in = writedata[7:0]
+assign d_in = writedata[7:0];
 assign nes_op = writedata[15:8];
 
 cpu c (
@@ -104,7 +104,7 @@ always_ff @(posedge clk) begin
    endcase
 
    readdata <= d_out;
-   $display("nes_op:%d  d_in:%b  addr:%x  d_out:%b",
+   $display("nes_op:%d  d_in:%b  addr:%x  d_out:%b", 
       nes_op, d_in, addr, d_out);
 end
 
