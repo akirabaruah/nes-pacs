@@ -225,11 +225,9 @@ module cpu (
         case (state)
           ABS2:    ADH <= d_in;
 
-		    ABSX2:	 ADH <= alu_out;
+		  ABSX2:   ADH <= alu_out;
 
-		    ABSY2:	 ADH <= alu_out;
-
-          INDY2:   ADH <= alu_out;
+          INDY3:   ADH <= alu_out;
 
           default: ADH <= ADH;
         endcase;
@@ -243,7 +241,7 @@ module cpu (
             INDX2: BAL <= alu_out;
             INDX3: BAL <= alu_out;
 
-            INDY2: BAL <= alu_out;
+            INDY1: BAL <= alu_out;
 
             ZPX1:  BAL <= alu_out;
          endcase
@@ -256,10 +254,6 @@ module cpu (
          case (state)
 
             INDY1: IAL <= alu_out;
-
-
-
-
          endcase
       end
    /*
@@ -269,17 +263,17 @@ module cpu (
    always_comb
      begin
         case (state)
-         
+
         ABS2:   addr = {d_in, ADL};
-   
+
         INDX2:  addr = {8'b0, BAL};
         INDX3:  addr = {8'b0, BAL};
         INDX4:  addr = {d_in, ADL};
 
-        INDY1:  addr = {8'b0, d_in};
-        INDY2:  addr = {8'b0, BAL};
-        INDY3:  addr = {d_in, ADL};
-        INDY4:  addr = {ADH, ADL};
+        INDY1:  addr = {8'b0, d_in}; // IAL
+        INDY2:  addr = {8'b0, BAL}; // IAL + 1
+        INDY3:  addr = {d_in, ADL}; // BAH, BAL + Y
+        INDY4:  addr = {ADH, ADL}; // BAH + C, BAL + Y
 
 		  ABSX2:	 addr = {d_in, ADL};
 		  ABSX3:	 addr = {ADH, ADL};
@@ -331,7 +325,7 @@ module cpu (
          ZPX3,
 
 		   ZP1
-         
+
 			} state;
 
    initial state = FETCH;
@@ -362,8 +356,8 @@ module cpu (
           INDX4:  state <= FETCH;
 
           INDY1:  state <= INDY2;
-          INDY2:  state <= P[0] ? INDY3 : INDY4;
-          INDY3:  state <= INDY4;
+          INDY2:  state <= INDY3;
+          INDY3:  state <= P[0] ? INDY4 : FETCH;
           INDY4:  state <= FETCH;
 
           ABS1:    state <= ABS2;
@@ -383,16 +377,18 @@ module cpu (
           ZPX1:    state <= ZPX2;
           ZPX2:    state <= ZPX3;
           ZPX3:    state <= FETCH;
-         
+
 
           default: state <= FETCH;
         endcase;
 
-        $display("sync:%b addr:%x d_in:%x A:%x X:%x Y:%x a:%x b:%x: out:%x P:%x BAL:%x Carry:%d ADL:%x ADH:%x",
-                 sync, addr, d_in, A, X, Y, alu_a, alu_b, alu_out, P, BAL, P[0], ADL, ADH);
      end
 
-
+   always_ff @ (posedge clk)
+     begin
+        $display("addr:%x d_in:%x A:%x X:%x Y:%x a:%x b:%x: out:%x P:%x BAL:%x ADL:%x ADH:%x",
+                 addr, d_in, A, X, Y, alu_a, alu_b, alu_out, P, BAL, ADL, ADH);
+     end
 
    /*
     * alu_a, alu_b control
@@ -407,7 +403,7 @@ module cpu (
 
         INDY1: alu_a = 1;
         INDY2: alu_a = Y;
-        INDY3: alu_a = ADH;
+        INDY3: alu_a = 0;
 
 		  ABSX1: alu_a = X;
 		  ABSX3: alu_a = ADH;
@@ -427,12 +423,13 @@ module cpu (
      begin
         case (state)
 
-        INDX1:  alu_b = d_in; // ADL 
+        INDX1:  alu_b = d_in; // ADL
         INDX2:  alu_b = 1;
 
         INDY1:  alu_b = d_in; // BAL
         INDY2:  alu_b = d_in; // ADL
-        INDY3:  alu_b = P[0];
+        INDY3:  alu_b = d_in; // BAH
+
 
 		  ABSX1:	 alu_b = d_in; // ADL
 		  ABSX3:	 alu_b = P[0];
