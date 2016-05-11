@@ -61,6 +61,7 @@ module cpu (
    logic [1:0]            cc;
    logic [4:0]            opcode;
 
+
    assign {aaa, bbb, cc} = IR;
    assign opcode = {aaa, cc};
    assign t1op = {d_in[7:5], d_in[1:0]};
@@ -83,6 +84,20 @@ module cpu (
       endcase
    end
 
+   /*
+    * Store control signal
+    */
+
+
+   logic store;
+   always_comb begin
+      case (aaa)
+        STA: store = 1;
+        STY: store = 1;
+        STX: store = 1;
+        default: store = 0; 
+      endcase
+   end
 
    /*
     * Registers
@@ -372,7 +387,7 @@ module cpu (
           ABSY2: state <= P[0] ? ABSY3 : FETCH;
           ABSY3: state <= FETCH;
 
-          ZP1: state <= FETCH;
+          ZP1:  state <= FETCH;
 
           ZPX1: state <= ZPX2;
           ZPX2: state <= ZPX3;
@@ -386,8 +401,8 @@ module cpu (
 
    always_ff @ (posedge clk)
      begin
-        $display("addr:%x d_in:%x A:%x X:%x Y:%x a:%x b:%x: out:%x P:%x BAL:%x ADL:%x ADH:%x",
-                 addr, d_in, A, X, Y, alu_a, alu_b, alu_out, P, BAL, ADL, ADH);
+        $display("addr:%x d_in:%x d_out:%x write:%x A:%x X:%x Y:%x a:%x b:%x: out:%x P:%x BAL:%x ADL:%x ADH:%x",
+                 addr, d_in, d_out, write, A, X, Y, alu_a, alu_b, alu_out, P, BAL, ADL, ADH);
      end
 
    /*
@@ -411,7 +426,7 @@ module cpu (
           ABSY1: alu_a = Y;
           ABSY3: alu_a = ADH;
 
-          ZPX1: alu_a = X;
+          ZPX1:  alu_a = X;
 
           FETCH: alu_a = arith ? A : d_in;
 
@@ -443,6 +458,35 @@ module cpu (
           default: alu_b = d_in;
         endcase;
      end
+
+
+   /*
+    * d_out
+    */
+   always_comb
+      begin
+         case (state)
+            ZP1: d_out = A; // Need to change this to be either A, X, or Y depending on type of store
+            ABS2: d_out = A; // Need to change this to be either A, X, or Y depending on type of store
+            default: d_out = 0;
+         endcase
+      end
+
+
+ 
+   /*
+    * write 
+    */
+   always_comb
+      begin
+         case (state)
+            ZP1: write = store ? 1 : 0; 
+            ABS2: write = store ? 1 : 0; 
+            default: write = 0;
+         endcase
+      end
+    
+
 
    /*
     * ALU carry in
