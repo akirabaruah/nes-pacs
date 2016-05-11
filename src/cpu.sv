@@ -1,9 +1,9 @@
 parameter
   ALU_ADD = 0,
   ALU_AND = 1,
-  ALU_OR  = 2,
+  ALU_OR = 2,
   ALU_EOR = 3,
-  ALU_SR  = 4,
+  ALU_SR = 4,
   ALU_SUB = 5;
 
 
@@ -56,31 +56,31 @@ module cpu (
     * Instruction Fields
     */
 
-   logic [2:0] aaa;
-   logic [2:0] bbb;
-   logic [1:0] cc;
-   logic [4:0] opcode;
+   logic [2:0]            aaa;
+   logic [2:0]            bbb;
+   logic [1:0]            cc;
+   logic [4:0]            opcode;
 
    assign {aaa, bbb, cc} = IR;
    assign opcode = {aaa, cc};
    assign t1op = {d_in[7:5], d_in[1:0]};
 
    /*
-	* Arith control signal
-	*/
+    * Arith control signal
+    */
 
-   logic arith;
+   logic                  arith;
    always_comb begin
-	  case (aaa)
-		LDA: 		arith = 0;
+      case (aaa)
+        LDA: arith = 0;
 
-		ORA:		arith = 1;
-		AND:		arith = 1;
-		EOR:		arith = 1;
-		ADC:		arith = 1;
-		SBC:		arith = 1;
-		default: arith = 0;
-	  endcase
+        ORA: arith = 1;
+        AND: arith = 1;
+        EOR: arith = 1;
+        ADC: arith = 1;
+        SBC: arith = 1;
+        default: arith = 0;
+      endcase
    end
 
 
@@ -88,16 +88,16 @@ module cpu (
     * Registers
     */
 
-   logic [7:0]            A,     // accumulator
-                          X,     // X index
-                          Y,     // Y index
-                          D_OUT, // data output
-                          IR,    // instruction register
-                          P,     // processor status
-                          SP,    // stack pointer
-                          ADL,   // address low
-                          ADH;   // address high
-   logic [15:0]           PC;    // program counter
+   logic [7:0] A, // accumulator
+               X, // X index
+               Y, // Y index
+               D_OUT, // data output
+               IR, // instruction register
+               P, // processor status
+               SP, // stack pointer
+               ADL, // address low
+               ADH; // address high
+   logic [15:0] PC; // program counter
 
    /*
     * Instruction Register
@@ -112,17 +112,17 @@ module cpu (
    /*
     * Accumulator
     */
-   //  ORA, AND, EOR, ADC, SBC
+   // ORA, AND, EOR, ADC, SBC
 
    always_ff @ (posedge clk)
      begin
         case (state)
-		  DECODE:
-			case (aaa)
-			  default: A <= A;
-			endcase
-		  FETCH: A <= arith ? alu_out : d_in;
-		  default: 		A <= A;
+          DECODE:
+            case (aaa)
+              default: A <= A;
+            endcase
+          FETCH: A <= arith ? alu_out : d_in;
+          default: A <= A;
         endcase;
      end
 
@@ -166,30 +166,30 @@ module cpu (
    always_ff @ (posedge clk)
      begin
         case (state)
-		  ABS2,
+          ABS2,
 
-        INDX1,
-        INDX2,
-        INDX3,
-        INDX4,
+          INDX1,
+          INDX2,
+          INDX3,
+          INDX4,
 
-        INDY1,
-        INDY2,
-        INDY3,
-        INDY4,
+          INDY1,
+          INDY2,
+          INDY3,
+          INDY4,
 
-		  ABSY2,
-		  ABSY3,
+          ABSY2,
+          ABSY3,
 
-		  ABSX2,
-		  ABSX3,
+          ABSX2,
+          ABSX3,
 
-        ZPX1,
-        ZPX2,
-        ZPX3,
+          ZPX1,
+          ZPX2,
+          ZPX3,
 
-		  ZP1:     PC <= PC;
-		  default: PC <= PC + 1;
+          ZP1: PC <= PC;
+          default: PC <= PC + 1;
         endcase
      end
 
@@ -200,17 +200,17 @@ module cpu (
    always_ff @ (posedge clk)
      begin
         case (state)
-        ABS1:   ADL <= d_in;
+          ABS1: ADL <= d_in;
 
-        INDX3:  ADL <= d_in;
+          INDX3: ADL <= d_in;
 
-        INDY2:  ADL <= alu_out;
+          INDY2: ADL <= alu_out;
 
-		  ZP1:	 ADL <= d_in;
+          ZP1: ADL <= d_in;
 
-		  ABSX1:	 ADL <= alu_out;
+          ABSX1: ADL <= alu_out;
 
-		  ABSY1:	 ADL <= alu_out;
+          ABSY1: ADL <= alu_out;
 
           default: ADL <= ADL;
         endcase;
@@ -223,11 +223,11 @@ module cpu (
    always_ff @ (posedge clk)
      begin
         case (state)
-          ABS2:    ADH <= d_in;
+          ABS2: ADH <= d_in;
 
-		  ABSX2:   ADH <= alu_out;
+          ABSX2: ADH <= alu_out;
 
-          INDY3:   ADH <= alu_out;
+          INDY3: ADH <= alu_out;
 
           default: ADH <= ADH;
         endcase;
@@ -235,27 +235,27 @@ module cpu (
 
    logic [7:0] BAL;
    always_ff @ (posedge clk)
-      begin
-         case (state)
-            INDX1: BAL <= alu_out;
-            INDX2: BAL <= alu_out;
-            INDX3: BAL <= alu_out;
+     begin
+        case (state)
+          INDX1: BAL <= alu_out;
+          INDX2: BAL <= alu_out;
+          INDX3: BAL <= alu_out;
 
-            INDY1: BAL <= alu_out;
+          INDY1: BAL <= alu_out;
 
-            ZPX1:  BAL <= alu_out;
-         endcase
-      end
+          ZPX1: BAL <= alu_out;
+        endcase
+     end
 
 
    logic [7:0] IAL;
    always_ff @ (posedge clk)
-      begin
-         case (state)
+     begin
+        case (state)
 
-            INDY1: IAL <= alu_out;
-         endcase
-      end
+          INDY1: IAL <= alu_out;
+        endcase
+     end
    /*
     * Address Output
     */
@@ -264,28 +264,28 @@ module cpu (
      begin
         case (state)
 
-        ABS2:   addr = {d_in, ADL};
+          ABS2: addr = {d_in, ADL};
 
-        INDX2:  addr = {8'b0, BAL};
-        INDX3:  addr = {8'b0, BAL};
-        INDX4:  addr = {d_in, ADL};
+          INDX2: addr = {8'b0, BAL};
+          INDX3: addr = {8'b0, BAL};
+          INDX4: addr = {d_in, ADL};
 
-        INDY1:  addr = {8'b0, d_in}; // IAL
-        INDY2:  addr = {8'b0, BAL}; // IAL + 1
-        INDY3:  addr = {d_in, ADL}; // BAH, BAL + Y
-        INDY4:  addr = {ADH, ADL}; // BAH + C, BAL + Y
+          INDY1: addr = {8'b0, d_in}; // IAL
+          INDY2: addr = {8'b0, BAL}; // IAL + 1
+          INDY3: addr = {d_in, ADL}; // BAH, BAL + Y
+          INDY4: addr = {ADH, ADL}; // BAH + C, BAL + Y
 
-		  ABSX2:	 addr = {d_in, ADL};
-		  ABSX3:	 addr = {ADH, ADL};
+          ABSX2: addr = {d_in, ADL};
+          ABSX3: addr = {ADH, ADL};
 
-		  ABSY2:	 addr = {d_in, ADL};
-		  ABSY3:	 addr = {ADH, ADL};
+          ABSY2: addr = {d_in, ADL};
+          ABSY3: addr = {ADH, ADL};
 
-		  ZP1:    addr = {8'b0, d_in};
+          ZP1: addr = {8'b0, d_in};
 
-        ZPX3:   addr = {8'b0, BAL};
+          ZPX3: addr = {8'b0, BAL};
 
-        default: addr = PC;
+          default: addr = PC;
         endcase;
      end
 
@@ -296,18 +296,18 @@ module cpu (
 
    enum {
          DECODE, // T0
-         FETCH,  // TX (final state of instruction)
+         FETCH, // TX (final state of instruction)
 
          ABS1,
          ABS2,
 
-  		   ABSX1,
-		   ABSX2,
-		   ABSX3,
+         ABSX1,
+         ABSX2,
+         ABSX3,
 
          ABSY1,
-		   ABSY2,
-		   ABSY3,
+         ABSY2,
+         ABSY3,
 
          INDX1,
          INDX2,
@@ -324,59 +324,59 @@ module cpu (
          ZPX2,
          ZPX3,
 
-		   ZP1
+         ZP1
 
-			} state;
+         } state;
 
    initial state = FETCH;
 
    always_ff @ (posedge clk)
      begin
         case (state)
-          FETCH:   state <= DECODE;
+          FETCH: state <= DECODE;
           DECODE: begin
              casex (d_in)
                8'bxxx01101,
                8'bxxx01110,
-               8'bxxx01100: state <= ABS1;  // Absolute
-               8'bxxx00101: state <= ZP1;   // Zero Page
+               8'bxxx01100: state <= ABS1; // Absolute
+               8'bxxx00101: state <= ZP1; // Zero Page
                8'bxxx11101: state <= ABSX1; // Absolute X
                8'bxxx11001: state <= ABSY1; // Absolute Y
                8'bxxx00001: state <= INDX1; // Indirect, X
                8'bxxx10001: state <= INDY1; // Indirect, Y
-               8'bxxx10101: state <= ZPX1;  // Zero Page X
+               8'bxxx10101: state <= ZPX1; // Zero Page X
 
-               default:     state <= FETCH; // Immediate
+               default: state <= FETCH; // Immediate
              endcase
           end
 
-          INDX1:  state <= INDX2;
-          INDX2:  state <= INDX3;
-          INDX3:  state <= INDX4;
-          INDX4:  state <= FETCH;
+          INDX1: state <= INDX2;
+          INDX2: state <= INDX3;
+          INDX3: state <= INDX4;
+          INDX4: state <= FETCH;
 
-          INDY1:  state <= INDY2;
-          INDY2:  state <= INDY3;
-          INDY3:  state <= P[0] ? INDY4 : FETCH;
-          INDY4:  state <= FETCH;
+          INDY1: state <= INDY2;
+          INDY2: state <= INDY3;
+          INDY3: state <= P[0] ? INDY4 : FETCH;
+          INDY4: state <= FETCH;
 
-          ABS1:    state <= ABS2;
-          ABS2:    state <= FETCH;
+          ABS1: state <= ABS2;
+          ABS2: state <= FETCH;
 
-          ABSX1:   state <= ABSX2;
-          ABSX2:   state <= P[0] ? ABSX3 : FETCH;
-          ABSX3:   state <= FETCH;
+          ABSX1: state <= ABSX2;
+          ABSX2: state <= P[0] ? ABSX3 : FETCH;
+          ABSX3: state <= FETCH;
 
 
-          ABSY1:   state <= ABSY2;
-          ABSY2:   state <= P[0] ? ABSY3 : FETCH;
-          ABSY3:   state <= FETCH;
+          ABSY1: state <= ABSY2;
+          ABSY2: state <= P[0] ? ABSY3 : FETCH;
+          ABSY3: state <= FETCH;
 
-  		    ZP1:     state <= FETCH;
+          ZP1: state <= FETCH;
 
-          ZPX1:    state <= ZPX2;
-          ZPX2:    state <= ZPX3;
-          ZPX3:    state <= FETCH;
+          ZPX1: state <= ZPX2;
+          ZPX2: state <= ZPX3;
+          ZPX3: state <= FETCH;
 
 
           default: state <= FETCH;
@@ -398,22 +398,22 @@ module cpu (
      begin
         case (state)
 
-        INDX1: alu_a = X;
-        INDX2: alu_a = BAL;
+          INDX1: alu_a = X;
+          INDX2: alu_a = BAL;
 
-        INDY1: alu_a = 1;
-        INDY2: alu_a = Y;
-        INDY3: alu_a = 0;
+          INDY1: alu_a = 1;
+          INDY2: alu_a = Y;
+          INDY3: alu_a = 0;
 
-		  ABSX1: alu_a = X;
-		  ABSX3: alu_a = ADH;
+          ABSX1: alu_a = X;
+          ABSX3: alu_a = ADH;
 
-        ABSY1: alu_a = Y;
-        ABSY3: alu_a = ADH;
+          ABSY1: alu_a = Y;
+          ABSY3: alu_a = ADH;
 
-        ZPX1:  alu_a = X;
+          ZPX1: alu_a = X;
 
-		  FETCH: alu_a = arith ? A : d_in;
+          FETCH: alu_a = arith ? A : d_in;
 
           default: alu_a = 0;
         endcase;
@@ -423,23 +423,23 @@ module cpu (
      begin
         case (state)
 
-        INDX1:  alu_b = d_in; // ADL
-        INDX2:  alu_b = 1;
+          INDX1: alu_b = d_in; // ADL
+          INDX2: alu_b = 1;
 
-        INDY1:  alu_b = d_in; // BAL
-        INDY2:  alu_b = d_in; // ADL
-        INDY3:  alu_b = d_in; // BAH
+          INDY1: alu_b = d_in; // BAL
+          INDY2: alu_b = d_in; // ADL
+          INDY3: alu_b = d_in; // BAH
 
 
-		  ABSX1:	 alu_b = d_in; // ADL
-		  ABSX3:	 alu_b = P[0];
+          ABSX1: alu_b = d_in; // ADL
+          ABSX3: alu_b = P[0];
 
-        ABSY1:  alu_b = d_in; // ADL
-        ABSY3:  alu_b = P[0];
+          ABSY1: alu_b = d_in; // ADL
+          ABSY3: alu_b = P[0];
 
-        ZPX1:   alu_b = d_in;
+          ZPX1: alu_b = d_in;
 
-		  FETCH:	 alu_b = d_in;
+          FETCH: alu_b = d_in;
           default: alu_b = d_in;
         endcase;
      end
@@ -452,11 +452,11 @@ module cpu (
      begin
         case (state)
 
-          ABSX2:   cin = P[0];
-          ABSY2:   cin = P[0];
+          ABSX2: cin = P[0];
+          ABSY2: cin = P[0];
 
-          INDY2:   cin = P[0];
-          INDY3:   cin = P[0];
+          INDY2: cin = P[0];
+          INDY3: cin = P[0];
 
           default: cin = 0;
         endcase
@@ -470,15 +470,15 @@ module cpu (
    logic [4:0] alu_mode;
    logic       cin, cout, over, zero, sign;
    alu ALU(
-		   .alu_a(alu_a),
-	       .alu_b(alu_b),
-		   .mode(alu_mode),
-	       .carry_in(cin),
-	       .alu_out(alu_out),
-	       .carry_out(cout),
-		   .overflow(over),
-		   .zero(over),
-		   .sign(sign)
+           .alu_a(alu_a),
+           .alu_b(alu_b),
+           .mode(alu_mode),
+           .carry_in(cin),
+           .alu_out(alu_out),
+           .carry_out(cout),
+           .overflow(over),
+           .zero(over),
+           .sign(sign)
            );
 
    always_comb
