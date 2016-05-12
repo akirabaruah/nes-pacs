@@ -34,30 +34,21 @@ int main(int argc, char **argv) {
     }
     size_t len = fread(memory, 1, MEMSIZE, binary);
 
-	printf("%8s,%8s,%8s,%8s\n",
-		   "time", "in", "out", "addr");
-
-	//tick(cpu);
-	//	cpu->d_in = 0;
 	while (1) {
 		if (Verilated::gotFinish()) { break; }
 
+		addr = cpu->addr;
 
-      if (addr == (len+1)) { break; }
-      cpu->clk = 0;
-      cpu->eval();
-
-      addr = cpu->addr;
-      cpu->clk = 1;
-      cpu->eval();
-      //		tick(cpu);
-      //fprintf(stderr, "addr = %x\n", addr);
-      input = memory[addr];
-     // fprintf(stderr, "input = %x\n", input);
-		cpu->d_in = input;
+		if (addr == (len+1)) { break; }
 
 		if (cpu->write) { memory[cpu->addr] = cpu->d_out; }
-      print_stats(cpu, time);
+
+		tick(cpu);
+
+		input = memory[addr];
+		cpu->d_in = input;
+
+        print_stats(cpu, time);
 		time++;
 	}
 	cpu->final();
@@ -76,17 +67,17 @@ void tick(Vcpu *cpu) {
 void print_stats(Vcpu *cpu, int time) {
     static int first = 1;
     if (first) {
-        printf("Cycle Op  A  X  Y  P\n");
+        printf("Cycle Op  A\n");//  X  Y  P\n");
         first = 0;
     }
 
     if (cpu->sync) {
-        printf("%5d %.2x %.2x %.2x %.2x %.2x\n",
+        printf("%5d %.2x %.2x\n",// %.2x %.2x %.2x\n",
                time,
                cpu->v__DOT__IR,
-               cpu->v__DOT__A,
+               cpu->v__DOT__A);/*,
                cpu->v__DOT__X,
                cpu->v__DOT__Y,
-               cpu->v__DOT__P);
+               cpu->v__DOT__P);*/
     }
 }
