@@ -1,5 +1,6 @@
 #include <stdint.h>
 #include <stdio.h>
+#include <string.h>
 #include "fake6502.h"
 
 #define MEMSIZE 65536
@@ -38,9 +39,13 @@ int main(int argc, char **argv) {
         return 2;
     }
     int i = 0;
+    memset(memory, 9, MEMSIZE);
     while(fread(&byte, sizeof(byte), 1, file)) {
         memory[i++] = byte;
     }
+    memory[i] = 0;
+    memory[0xFFFC] = 0;
+    memory[0xFFFD] = 0;
 
     /* Start simulation */
     reset6502();

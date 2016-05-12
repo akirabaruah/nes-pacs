@@ -203,7 +203,7 @@ module cpu (
             ABSX1,
             ABSY1,
             INDY2,
-            FETCH: P <= {sign, over, X[0], Y[0], 2'b00, zero, cout};
+            FETCH: P <= {sign, over, 3'b100, P[2], zero, cout};
           endcase;
      end
 
@@ -394,6 +394,7 @@ module cpu (
 
    always_ff @ (posedge clk)
      begin
+        if (ready) begin
         case (state)
           FETCH: state <= DECODE;
           DECODE: begin
@@ -441,7 +442,7 @@ module cpu (
 
           default: state <= FETCH;
         endcase;
-
+     end 
      end
 
 `ifdef DEBUG
@@ -518,8 +519,24 @@ module cpu (
    always_comb
       begin
          case (state)
-            ZP1: d_out = A; // Need to change this to be either A, X, or Y depending on type of store
-            ABS2: d_out = A; // Need to change this to be either A, X, or Y depending on type of store
+            ZP1: begin
+               if (store) begin
+                  case (aaa)
+                     STA: d_out = A;
+                     STX: d_out = X;
+                     STY: d_out = Y;
+                  endcase
+               end
+              end
+            ABS2: begin
+               if (store) begin
+                  case (aaa)
+                     STA: d_out = A;
+                     STX: d_out = X;
+                     STY: d_out = Y;
+                  endcase
+               end
+              end
             default: d_out = 0;
          endcase
          if (reset)
