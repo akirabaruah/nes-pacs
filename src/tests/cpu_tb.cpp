@@ -11,7 +11,7 @@ void print_stats(Vcpu *cpu, int time);
 
 int main(int argc, char **argv) {
 
-	Verilated::commandArgs(argc, argv);
+    Verilated::commandArgs(argc, argv);
 
     if (argc < 2) {
         cerr << "usage: " << argv[0] << " <6502 executable>" << endl;
@@ -34,27 +34,28 @@ int main(int argc, char **argv) {
     }
     size_t len = fread(memory, 1, MEMSIZE, binary);
 
-	while (1) {
-		if (Verilated::gotFinish()) { break; }
+    while (1) {
+        if (Verilated::gotFinish()) { break; }
 
-		addr = cpu->addr;
+        addr = cpu->addr;
 
-		if (addr == (len+1)) { break; }
+        if (addr == (len+1)) { break; }
 
-		if (cpu->write) { memory[cpu->addr] = cpu->d_out; }
+        if (cpu->write) { memory[cpu->addr] = cpu->d_out; }
 
-		tick(cpu);
+        tick(cpu);
 
-		input = memory[addr];
-		cpu->d_in = input;
+        input = memory[addr];
+        cpu->d_in = input;
+        cpu->eval();
 
         print_stats(cpu, time);
-		time++;
-	}
-	cpu->final();
+        time++;
+    }
+    cpu->final();
 
-	delete cpu;
-	return 0;
+    delete cpu;
+    return 0;
 }
 
 void tick(Vcpu *cpu) {
