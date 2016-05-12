@@ -34,7 +34,11 @@ int main(int argc, char **argv) {
     }
     size_t len = fread(memory, 1, MEMSIZE, binary);
 
-		cpu->d_in = 0;
+	printf("%8s,%8s,%8s,%8s\n",
+		   "time", "in", "out", "addr");
+
+	//tick(cpu);
+	//	cpu->d_in = 0;
 	while (1) {
 		if (Verilated::gotFinish()) { break; }
 

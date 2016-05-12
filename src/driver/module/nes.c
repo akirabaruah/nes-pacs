@@ -24,19 +24,19 @@ ssize_t nes_show(struct device_driver *drv, char *buf)
 
 ssize_t nes_store(struct device_driver *drv, const char *buf, size_t count)
 {
-	u32 nes_args;
+	u64 nes_args;
 
 	if (buf == NULL) {
 		pr_err("Error, string must not be NULL\n");
 		return -EINVAL;
 	}
 
-	if (kstrtou32(buf, 16, &nes_args) < 0) {
+	if (kstrtou64(buf, 16, &nes_args) < 0) {
 		pr_err("Could not convert string to integer\n");
 		return -EINVAL;
 	}
 
-	iowrite32(nes_args, nes_mem);
+	iowrite64(nes_args, nes_mem);
 
 	return count;
 }
