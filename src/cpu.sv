@@ -195,11 +195,15 @@ module cpu (
 
    always_ff @ (posedge clk)
      begin
-        case (state)
-          default: P <= {sign, over, X[0], Y[0], 2'b00, zero, cout}; // some bs
-        endcase;
         if (reset)
            P <= 0;
+        else
+          case (state)
+            ABSX1,
+            ABSY1,
+            INDY2,
+            FETCH: P <= {sign, over, X[0], Y[0], 2'b00, zero, cout};
+          endcase;
      end
 
    /*
@@ -545,21 +549,8 @@ module cpu (
     * ALU carry in
     */
 
-   always_comb
-     begin
-        case (state)
+   assign cin = reset ? 0 : P[0];
 
-          ABSX2: cin = P[0];
-          ABSY2: cin = P[0];
-
-          INDY2: cin = P[0];
-          INDY3: cin = P[0];
-
-          default: cin = 0;
-        endcase
-      if (reset)
-         write = 0;
-     end
 
    /*
     * ALU
