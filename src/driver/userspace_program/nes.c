@@ -35,6 +35,7 @@ void print_state(nes_args *nes)
 int main(int argc, char *argv[])
 {
 	FILE * fd;
+	int mem_fd;
 	int ret = EXIT_FAILURE;
 	nes_args value;
 	off_t nes_base = LWHPS2FPGA_BRIDGE_BASE;
@@ -46,8 +47,8 @@ int main(int argc, char *argv[])
 	/* open the memory device file */
 	// char *mem_file = "/sys/bus/platform/devices/nes/nes";
     char *mem_file = "/dev/mem";
-	fd = open(mem_file, O_RDWR|O_SYNC);
-	if (fd < 0) {
+	mem_fd = open(mem_file, O_RDWR|O_SYNC);
+	if (mem_fd < 0) {
 		perror("open");
 		exit(EXIT_FAILURE);
 	}
@@ -56,7 +57,7 @@ int main(int argc, char *argv[])
 
 	/* map the LWHPS2FPGA bridge into process memory */
 	bridge_map = mmap(NULL, PAGE_SIZE, PROT_WRITE, MAP_SHARED,
-				fd, nes_base);
+				mem_fd, nes_base);
 	if (bridge_map == MAP_FAILED) {
 		perror("mmap");
 		goto cleanup;
@@ -104,11 +105,26 @@ int main(int argc, char *argv[])
         value.address = (short) temp;
         
         // write the value 
-		*nes_mem = value;
+
+		unsigned long mem_value;
+		memcpy(&mem_value, &value, 8);		
+		*nes_mem = mem_value;
 
 		usleep(100);
-		print_state(&value);  // print
+		print_state((nes_args*)nes_mem);  // print
     }
+
+/*
+	int temp;
+	value.nes_op = (char) temp;
+	value.nes_in = (char) temp;
+	value.address = (short) temp;
+
+	*nes_mem = value;
+	usleep(100);
+	print_state(&value);
+
+*/
 
 	if (munmap(bridge_map, PAGE_SIZE) < 0) {
 		perror("munmap");
