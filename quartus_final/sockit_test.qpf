@@ -18,13 +18,13 @@
 #
 # Quartus II 64-Bit
 # Version 13.1.0 Build 162 10/23/2013 SJ Web Edition
-# Date created = 18:00:29  May 06, 2016
+# Date created = 01:53:52  May 11, 2016
 #
 # -------------------------------------------------------------------------- #
 
 QUARTUS_VERSION = "13.1"
-DATE = "18:00:29  May 06, 2016"
+DATE = "01:53:52  May 11, 2016"
 
 # Revisions
 
-PROJECT_REVISION = "nes"
+PROJECT_REVISION = "sockit_test"
