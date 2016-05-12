@@ -233,7 +233,6 @@ module cpu (
 
           ZPX1,
           ZPX2,
-          ZPX3,
 
           ZP1: PC <= PC;
           default: PC <= PC + 1;
@@ -342,7 +341,8 @@ module cpu (
 
           ZP1: addr = {8'b0, d_in};
 
-          ZPX3: addr = {8'b0, BAL};
+          ZPX1: addr = {8'b0, d_in};
+          ZPX2: addr = {8'b0, BAL};
 
           default: addr = PC;
         endcase;
@@ -384,7 +384,6 @@ module cpu (
 
          ZPX1,
          ZPX2,
-         ZPX3,
 
          ZP1
 
@@ -437,9 +436,7 @@ module cpu (
           ZP1:  state <= FETCH;
 
           ZPX1: state <= ZPX2;
-          ZPX2: state <= ZPX3;
-          ZPX3: state <= FETCH;
-
+          ZPX2: state <= FETCH;
 
           default: state <= FETCH;
         endcase;
