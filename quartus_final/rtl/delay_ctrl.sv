@@ -5,16 +5,16 @@ parameter
 	WRITE_MEM = 8'd3
 ;
 
-
 module delay_ctrl (
     input logic clk,
     input logic faster,
-    input logic slower,
+    output logic slower,
+	 //output logic [3:0] blink_delay,
 	 
 	 input logic reset,
 	 
 	 input logic read,
-    output logic [15:0] delay,
+    output logic [15:0] readdata,
 	 
 	 input logic write,
 	 input logic [15:0] writedata,
@@ -29,7 +29,34 @@ logic [15:0] cpu_addr, mem_addr;
 logic [7:0] d_out, mem_in, mem_out;
 logic [7:0] nes_op;                       // our own NES opcodes
 
+logic [15:0] tmp_data;
+
 assign nes_op = writedata[15:8];
+
+initial begin
+	tmp_data = 6;
+end
+
+//logic [3:0] delay_intern = 4'b1000;
+//assign blink_delay = delay_intern;
+
+
+
+always_ff @(posedge clk) begin
+	if (write) begin
+		tmp_data <= tmp_data + 1;
+	end
+
+	if (read) begin
+		slower <= 1;
+ 		readdata <= tmp_data;
+	end else begin
+		slower <= 0;
+ 		readdata <= 7;
+	end
+
+	readdata <= tmp_data;
+end
 
 cpu c (
    .clk (clk),
@@ -52,7 +79,8 @@ memory mem (
    .out (mem_out)
 );
 
-always_ff @(posedge clk) begin
+
+always_ff @ (posedge clk) begin
    case (nes_op)
       RESET_CPU: begin
          cpu_ready <= 0;
@@ -84,7 +112,7 @@ always_ff @(posedge clk) begin
          end
    endcase
 
-   delay[7:0] <= mem_out;
+   //TODO: readdata[7:0] <= mem_out;
 
 end
 endmodule

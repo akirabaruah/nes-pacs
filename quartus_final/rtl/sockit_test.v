@@ -26,6 +26,9 @@ wire [3:0] key_os;
 wire [3:0] delay;
 wire main_clk = CLOCK_50;
 
+assign delay[1] = 0;
+assign delay[2] = 0;
+//wire test_out;
 
 oneshot os (
     .clk (main_clk), // port mappings
@@ -35,7 +38,7 @@ oneshot os (
 
 
 soc_system soc (
-    .delay_ctrl_slower (key_os[0]),
+    .delay_ctrl_slower (delay[0]),
     .delay_ctrl_faster (key_os[1]),
     .memory_mem_a        (hps_memory_mem_a),
     .memory_mem_ba       (hps_memory_mem_ba),
