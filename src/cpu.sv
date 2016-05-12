@@ -95,7 +95,7 @@ module cpu (
         STA: store = 1;
         STY: store = 1;
         STX: store = 1;
-        default: store = 0; 
+        default: store = 0;
       endcase
    end
 
@@ -148,7 +148,7 @@ module cpu (
    always_ff @ (posedge clk)
      begin
         case (state)
-          default: X <= X + 1;
+          default: X <= X;
         endcase;
      end
 
@@ -157,8 +157,9 @@ module cpu (
     */
 
    always_ff @ (posedge clk)
-     begin case (state)
-          default: Y <= Y + 1;
+     begin
+        case (state)
+          default: Y <= Y;
         endcase;
      end
 
@@ -471,19 +472,19 @@ module cpu (
       end
 
 
- 
+
    /*
-    * write 
+    * write
     */
    always_comb
       begin
          case (state)
-            ZP1: write = store ? 1 : 0; 
-            ABS2: write = store ? 1 : 0; 
+            ZP1: write = store ? 1 : 0;
+            ABS2: write = store ? 1 : 0;
             default: write = 0;
          endcase
       end
-    
+
 
    /*
     * ALU carry in
