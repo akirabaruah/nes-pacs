@@ -1,3 +1,2 @@
 LDA #$0F
-EOR #$0F 
-ADC #$01
+EOR #$0F
