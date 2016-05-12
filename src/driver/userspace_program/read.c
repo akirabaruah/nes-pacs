@@ -87,6 +87,7 @@ int main(int argc, char *argv[])
     /* get the delay_ctrl peripheral's base address */
 	nes_mem = (unsigned short *) (bridge_map + NES_OFFSET);
    
+   int x = 0;
    while (memory[x++] = *nes_mem) {
    }
 /*
