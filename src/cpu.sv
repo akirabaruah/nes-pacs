@@ -429,11 +429,13 @@ module cpu (
 
      end
 
+`ifdef DEBUG
    always_ff @ (posedge clk)
      begin
         $display("addr:%x d_in:%x d_out:%x write:%x A:%x X:%x Y:%x a:%x b:%x: out:%x P:%x BAL:%x ADL:%x ADH:%x",
                  addr, d_in, d_out, write, A, X, Y, alu_a, alu_b, alu_out, P, BAL, ADL, ADH);
      end
+`endif
 
    /*
     * alu_a, alu_b control
