@@ -203,7 +203,7 @@ module cpu (
             ABSX1,
             ABSY1,
             INDY2,
-            FETCH: P <= {sign, over, X[0], Y[0], 2'b00, zero, cout};
+            FETCH: P <= {sign, over, 3'b100, P[2], zero, cout};
           endcase;
      end
 
