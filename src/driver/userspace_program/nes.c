@@ -19,7 +19,7 @@ typedef struct {
   unsigned short address; 
 } nes_args;
 
-unsigned long *nes_mem;
+unsigned short *nes_mem;
 void *bridge_map;
 int nes_fd;
 
@@ -55,7 +55,7 @@ int main(int argc, char *argv[])
 	printf("open done: %s\n", mem_file);	
 
 	/* map the LWHPS2FPGA bridge into process memory */
-	bridge_map = mmap(NULL, PAGE_SIZE, PROT_WRITE, MAP_SHARED,
+	bridge_map = mmap(NULL, PAGE_SIZE, PROT_WRITE | PROT_READ, MAP_SHARED,
 				mem_fd, nes_base);
 	if (bridge_map == MAP_FAILED) {
 		perror("mmap");
@@ -78,12 +78,25 @@ int main(int argc, char *argv[])
 
 	printf("set nes_mem\n");
     /* get the delay_ctrl peripheral's base address */
-	nes_mem = (unsigned long *) (bridge_map + NES_OFFSET);
+	nes_mem = (unsigned short *) (bridge_map + NES_OFFSET);
    
-   int *user_num;
+   short user_num = 0;
+	short read_num = 0;
+//	unsigned long read_num = 0;
+//	unsigned long write_num = 0; 
+//	nes_args mem_args;
    while (1) {
-      scanf("%d", user_num);
-      *nes_mem = *user_num; 
+      scanf("%hu", &user_num);
+		printf("user_num = %d\n", user_num);
+		
+//		mem_args.nes_in = user_num;
+//		memcpy(&mem_args, &write_num, sizeof(nes_args));		
+
+		*nes_mem = user_num;
+		sleep(1);
+
+		read_num = *nes_mem;
+		printf("num is %d\n", read_num);
    }
 /*
     for (;;) {
