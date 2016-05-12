@@ -1,0 +1,4 @@
+LDX #$08
+STX $0506
+ADC $00aa,X
+ADC #$03
