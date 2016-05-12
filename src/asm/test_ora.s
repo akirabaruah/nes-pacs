@@ -1,3 +1,3 @@
 LDA #$0F
-ORA #$F0 
-ADC #$01
+ORA #$F0
+ORA #$00

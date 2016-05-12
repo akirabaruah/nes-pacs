@@ -1,3 +1,3 @@
-LDA #$03
+LDA #$0F
+SBC #$03
 SBC #$01
-ADC #$02
