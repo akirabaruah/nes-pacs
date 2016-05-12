@@ -4,7 +4,8 @@ parameter
   ALU_OR = 2,
   ALU_EOR = 3,
   ALU_SR = 4,
-  ALU_SUB = 5;
+  ALU_SUB = 5,
+  ALU_CMP = 6;
 
 
 /*
@@ -80,6 +81,7 @@ module cpu (
         EOR: arith = 1;
         ADC: arith = 1;
         SBC: arith = 1;
+        CMP: arith = 1;
         default: arith = 0;
       endcase
       if (reset)
@@ -574,6 +576,7 @@ module cpu (
           8'b001xxx01: alu_mode = ALU_AND;
           8'b010xxx01: alu_mode = ALU_EOR;
           8'b011xxx01: alu_mode = ALU_ADD;
+          8'b110xxx01: alu_mode = ALU_CMP;
           8'b111xxx01: alu_mode = ALU_SUB;
           8'b010xxx10: alu_mode = ALU_SR;
 
