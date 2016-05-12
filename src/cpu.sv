@@ -157,8 +157,7 @@ module cpu (
     */
 
    always_ff @ (posedge clk)
-     begin
-        case (state)
+     begin case (state)
           default: Y <= Y + 1;
         endcase;
      end
