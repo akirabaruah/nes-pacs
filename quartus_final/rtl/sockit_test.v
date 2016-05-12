@@ -26,6 +26,7 @@ wire [3:0] key_os;
 wire [3:0] delay;
 wire main_clk = CLOCK_50;
 
+
 oneshot os (
     .clk (main_clk), // port mappings
     .edge_sig (KEY),
