@@ -436,7 +436,6 @@ module cpu (
    always_comb
      begin
         case (state)
-
           INDX1: alu_b = d_in; // ADL
           INDX2: alu_b = 1;
 
@@ -485,7 +484,6 @@ module cpu (
          endcase
       end
     
-
 
    /*
     * ALU carry in

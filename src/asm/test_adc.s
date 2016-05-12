@@ -1,4 +1,5 @@
-LDA #$01
+LDA #$02
 ADC #$02
+ADC #$04
 ADC #$04
 ADC #$04
