@@ -34,21 +34,26 @@ int main(int argc, char **argv) {
     }
     size_t len = fread(memory, 1, MEMSIZE, binary);
 
+		cpu->d_in = 0;
 	while (1) {
 		if (Verilated::gotFinish()) { break; }
 
-		addr = cpu->addr;
 
-		if (addr == (len+1)) { break; }
+      if (addr == (len+1)) { break; }
+      cpu->clk = 0;
+      cpu->eval();
 
-		if (cpu->write) { memory[cpu->addr] = cpu->d_out; }
-
-		tick(cpu);
-
-		input = memory[addr];
+      addr = cpu->addr;
+      cpu->clk = 1;
+      cpu->eval();
+      //		tick(cpu);
+      //fprintf(stderr, "addr = %x\n", addr);
+      input = memory[addr];
+     // fprintf(stderr, "input = %x\n", input);
 		cpu->d_in = input;
 
-        print_stats(cpu, time);
+		if (cpu->write) { memory[cpu->addr] = cpu->d_out; }
+      print_stats(cpu, time);
 		time++;
 	}
 	cpu->final();
