@@ -20,7 +20,7 @@ typedef struct {
   unsigned short address; 
 } nes_args;
 
-volatile unsigned short *nes_mem;
+volatile unsigned char *nes_mem;
 void *bridge_map;
 int nes_fd;
 
@@ -35,13 +35,10 @@ void print_state(nes_args *nes)
 
 int main(int argc, char *argv[])
 {
-	FILE * fd;
 	int mem_fd;
 	int ret = EXIT_FAILURE;
 	nes_args value;
 	off_t nes_base = LWHPS2FPGA_BRIDGE_BASE;
-   char buffer[100];
-   char *p;
    char memory[MEMSIZE];
    memset((char *)memory, 0, sizeof(memory));
 
@@ -60,7 +57,7 @@ int main(int argc, char *argv[])
     size_t len = fread(memory, 1, MEMSIZE, binary);
 
 
-	printf("userspace NES program started\n\n");
+	printf("userspace NES program started, read %d bytes.\n\n", len);
 
 	/* open the memory device file */
 	// char *mem_file = "/sys/bus/platform/devices/nes/nes";
@@ -86,12 +83,21 @@ int main(int argc, char *argv[])
 	printf("loading program into memory\n");
 
     /* get the delay_ctrl peripheral's base address */
-	nes_mem = (unsigned short *) (bridge_map + NES_OFFSET);
-   
-   int x = 1;
+	nes_mem = (unsigned char *) (bridge_map + NES_OFFSET);
+  	printf("passed nes_mem\n"); 
+   int x = 0;
    while (x < len) {
-      *nes_mem = memory[x++]; 
-   }
+		printf("%d: writing %d to memory\n", x, memory[x]);
+		nes_mem[2 * x] = memory[x];
+		//sleep(1);
+		x++;
+	}
+	x = 0;
+	while (x < len) {
+		printf("read %d\n", nes_mem[2 * x]);
+		x++;
+	}
+	printf("finished while loop\n");
 /*
     for (;;) {
         if (!(fgets(buffer, 100, fd)))
@@ -139,6 +145,7 @@ int main(int argc, char *argv[])
 
 */
 
+	printf("munmap\n");
 	if (munmap(bridge_map, PAGE_SIZE) < 0) {
 		perror("munmap");
 		goto cleanup;
@@ -147,6 +154,6 @@ int main(int argc, char *argv[])
 	ret = 0;
 
 cleanup:
-	fclose(fd);
+	fclose(binary);
 	return ret;
 }
