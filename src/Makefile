@@ -25,6 +25,7 @@ test_%: $(ASMDIR)/test_%.s
 .PHONY: test_all
 test_all: $(TESTS)
 	@echo 'Test Diffs (verilog <> standard)' > test.dump
+	@echo '  Cycle Op  A  X  Y  P' >> test.dump
 	@for test in $^; do \
 		$(TESTDIR)/test.sh $$test test.dump; \
 	done
