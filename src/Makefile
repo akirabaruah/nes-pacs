@@ -22,6 +22,13 @@ V%: %.sv $(TESTDIR)/%_tb.cpp
 test_%: $(ASMDIR)/test_%.s
 	xa -o $@ $^
 
+.PHONY: test_all
+test_all: $(TESTS)
+	@echo 'Test Diffs (verilog <> standard)' > test.dump
+	@for test in $^; do \
+		$(TESTDIR)/test.sh $$test test.dump; \
+	done
+
 .PHONY: run_test_*
 run_test_%: test_%
 	obj_dir/Vcpu $^
