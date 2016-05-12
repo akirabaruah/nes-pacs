@@ -15,12 +15,20 @@ sim:
 
 # Verilator
 V%: %.sv $(TESTDIR)/%_tb.cpp
-	verilator -Wall -Wno-lint --cc $< $(SUBMODULES) --exe $(word 2,$^)
+	verilator +define+$(def) -Wall -Wno-lint --cc $< $(SUBMODULES) --exe $(word 2,$^)
 	make --quiet -C obj_dir/ -j -f $@.mk $@
 
 # xa65 (6502 assembler)
 test_%: $(ASMDIR)/test_%.s
 	xa -o $@ $^
+
+.PHONY: test_all
+test_all: $(TESTS)
+	@echo 'Test Diffs (verilog <> standard)' > test.dump
+	@echo '  Cycle Op  A  X  Y  P' >> test.dump
+	@for test in $^; do \
+		$(TESTDIR)/test.sh $$test test.dump; \
+	done
 
 .PHONY: run_test_*
 run_test_%: test_%

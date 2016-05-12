@@ -82,6 +82,8 @@ module cpu (
         SBC: arith = 1;
         default: arith = 0;
       endcase
+      if (reset)
+         arith = 0;
    end
 
    /*
@@ -95,8 +97,10 @@ module cpu (
         STA: store = 1;
         STY: store = 1;
         STX: store = 1;
-        default: store = 0; 
+        default: store = 0;
       endcase
+      if (reset)
+         store = 0;
    end
 
    /*
@@ -122,6 +126,9 @@ module cpu (
      begin
         if (state == DECODE)
           IR <= d_in;
+
+        if (reset)
+          IR <= 0;
      end
 
    /*
@@ -139,6 +146,8 @@ module cpu (
           FETCH: A <= arith ? alu_out : d_in;
           default: A <= A;
         endcase;
+        if (reset)
+           A <= 0;
      end
 
    /*
@@ -148,18 +157,23 @@ module cpu (
    always_ff @ (posedge clk)
      begin
         case (state)
-          default: X <= X + 1;
+          default: X <= X;
         endcase;
-     end
+         if (reset)
+           X <= 0;
+    end
 
    /*
     * Y Index Register
     */
 
    always_ff @ (posedge clk)
-     begin case (state)
-          default: Y <= Y + 1;
+     begin
+        case (state)
+          default: Y <= Y;
         endcase;
+        if (reset)
+           Y <= 0;
      end
 
    /*
@@ -171,6 +185,8 @@ module cpu (
         case (state)
           default: P <= {sign, over, X[0], Y[0], 2'b00, zero, cout}; // some bs
         endcase;
+        if (reset)
+           P <= 0;
      end
 
    /*
@@ -205,6 +221,8 @@ module cpu (
           ZP1: PC <= PC;
           default: PC <= PC + 1;
         endcase
+        if (reset)
+           PC <= 0;
      end
 
    /*
@@ -228,7 +246,9 @@ module cpu (
 
           default: ADL <= ADL;
         endcase;
-     end
+        if (reset)
+           ADL <= 0;
+    end
 
    /*
     * Address High Register
@@ -245,6 +265,9 @@ module cpu (
 
           default: ADH <= ADH;
         endcase;
+        if (reset)
+           ADH <= 0;
+
      end
 
    logic [7:0] BAL;
@@ -259,6 +282,8 @@ module cpu (
 
           ZPX1: BAL <= alu_out;
         endcase
+        if (reset)
+            BAL <= 0;
      end
 
 
@@ -269,6 +294,9 @@ module cpu (
 
           INDY1: IAL <= alu_out;
         endcase
+        if (reset)
+            IAL <= 0;
+
      end
    /*
     * Address Output
@@ -301,6 +329,9 @@ module cpu (
 
           default: addr = PC;
         endcase;
+
+        if (reset)
+            addr = 0;
      end
 
 
@@ -398,11 +429,13 @@ module cpu (
 
      end
 
+`ifdef DEBUG
    always_ff @ (posedge clk)
      begin
         $display("addr:%x d_in:%x d_out:%x write:%x A:%x X:%x Y:%x a:%x b:%x: out:%x P:%x BAL:%x ADL:%x ADH:%x",
                  addr, d_in, d_out, write, A, X, Y, alu_a, alu_b, alu_out, P, BAL, ADL, ADH);
      end
+`endif
 
    /*
     * alu_a, alu_b control
@@ -431,6 +464,9 @@ module cpu (
 
           default: alu_a = 0;
         endcase;
+
+        if (reset)
+            alu_a = 0;
      end
 
    always_comb
@@ -455,6 +491,9 @@ module cpu (
           FETCH: alu_b = d_in;
           default: alu_b = d_in;
         endcase;
+       if (reset)
+         alu_b = 0;
+
      end
 
 
@@ -468,22 +507,26 @@ module cpu (
             ABS2: d_out = A; // Need to change this to be either A, X, or Y depending on type of store
             default: d_out = 0;
          endcase
+         if (reset)
+            d_out = 0;
       end
 
 
- 
+
    /*
-    * write 
+    * write
     */
    always_comb
       begin
          case (state)
-            ZP1: write = store ? 1 : 0; 
-            ABS2: write = store ? 1 : 0; 
+            ZP1: write = store ? 1 : 0;
+            ABS2: write = store ? 1 : 0;
             default: write = 0;
          endcase
+         if (reset)
+            write = 0;
       end
-    
+
 
    /*
     * ALU carry in
@@ -501,6 +544,8 @@ module cpu (
 
           default: cin = 0;
         endcase
+      if (reset)
+         write = 0;
      end
 
    /*
