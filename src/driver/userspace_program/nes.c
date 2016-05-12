@@ -79,7 +79,13 @@ int main(int argc, char *argv[])
 
     /* get the delay_ctrl peripheral's base address */
 	nes_mem = (unsigned long *) (bridge_map + NES_OFFSET);
-
+   
+   int *user_num;
+   while (1) {
+      scanf("%d", user_num);
+      *nes_mem = *user_num; 
+   }
+/*
     for (;;) {
         if (!(fgets(buffer, 100, fd)))
         	break;
@@ -113,7 +119,7 @@ int main(int argc, char *argv[])
 		usleep(100);
 		print_state((nes_args*)nes_mem);  // print
     }
-
+*/
 /*
 	int temp;
 	value.nes_op = (char) temp;
