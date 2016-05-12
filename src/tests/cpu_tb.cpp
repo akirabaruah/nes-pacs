@@ -37,6 +37,7 @@ int main(int argc, char **argv) {
     while (1) {
         if (Verilated::gotFinish()) { break; }
 
+        cpu->ready = 1;
         addr = cpu->addr;
 
         if (addr == (len+1)) { break; }
