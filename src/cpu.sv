@@ -133,6 +133,17 @@ module cpu (
           IR <= 0;
      end
 
+   enum {DST_A, DST_X, DST_Y} dst;
+   always_comb
+     begin
+        casex (IR)
+          8'b101xxx01: dst = DST_A;
+          8'b101xxx10: dst = DST_X;
+          8'b101xxx00: dst = DST_Y;
+          default: dst = DST_A;
+        endcase
+     end
+
    /*
     * Accumulator
     */
@@ -140,16 +151,14 @@ module cpu (
 
    always_ff @ (posedge clk)
      begin
-        case (state)
-          DECODE:
-            case (aaa)
-              default: A <= A;
-            endcase
-          FETCH: A <= arith ? alu_out : d_in;
-          default: A <= A;
-        endcase;
         if (reset)
            A <= 0;
+        else if (dst == DST_A)
+          case (state)
+            DECODE: A <= A;
+            FETCH: A <= arith ? alu_out : d_in;
+            default: A <= A;
+          endcase;
      end
 
    /*
@@ -158,11 +167,12 @@ module cpu (
 
    always_ff @ (posedge clk)
      begin
-        case (state)
-          default: X <= X;
-        endcase;
-         if (reset)
-           X <= 0;
+        if (reset)
+          X <= 0;
+        else if (dst == DST_X)
+          case (state)
+            default: X <= X;
+          endcase;
     end
 
    /*
@@ -171,11 +181,12 @@ module cpu (
 
    always_ff @ (posedge clk)
      begin
-        case (state)
-          default: Y <= Y;
-        endcase;
         if (reset)
            Y <= 0;
+        else if (dst == DST_Y)
+          case (state)
+            default: Y <= Y;
+          endcase;
      end
 
    /*
