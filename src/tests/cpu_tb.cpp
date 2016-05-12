@@ -68,17 +68,17 @@ void tick(Vcpu *cpu) {
 void print_stats(Vcpu *cpu, int time) {
     static int first = 1;
     if (first) {
-        printf("Cycle Op  A\n");//  X  Y  P\n");
+        printf("Cycle Op  A  X  Y  P\n");
         first = 0;
     }
 
     if (cpu->sync) {
-        printf("%5d %.2x %.2x\n",// %.2x %.2x %.2x\n",
+        printf("%5d %.2x %.2x %.2x %.2x %.2x\n",
                time,
                cpu->v__DOT__IR,
-               cpu->v__DOT__A);/*,
+               cpu->v__DOT__A,
                cpu->v__DOT__X,
                cpu->v__DOT__Y,
-               cpu->v__DOT__P);*/
+               cpu->v__DOT__P);
     }
 }
