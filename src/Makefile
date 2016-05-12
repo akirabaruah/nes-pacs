@@ -1,7 +1,7 @@
 TESTDIR=tests
-TESTS=	test_absolute_addr test_absx test_absy test_adc test_alu test_and \
-		test_cmp test_eor test_indx test_indy test_ldx test_logic test_ora \
-		test_sbc test_sta test_zp test_zpx test_zpy
+TESTS=	test_abs test_absx test_absy test_adc test_and test_cmp test_eor \
+		test_indx test_indy test_ldx test_logic test_ora test_sbc test_stabs \
+		test_sta test_zp test_zpx test_zpy
 
 ASMDIR=asm
 SUBMODULES= alu.sv
