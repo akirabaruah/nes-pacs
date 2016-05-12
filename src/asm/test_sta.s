@@ -1,6 +1,6 @@
 LDA #$05
-STA $0203
+STA $00aa
 LDA #$03
-LDA $0203
+LDA $00aa
 ADC #$02
 
