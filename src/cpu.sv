@@ -155,7 +155,6 @@ module cpu (
            A <= 0;
         else if (dst == DST_A)
           case (state)
-            DECODE: A <= A;
             FETCH: A <= arith ? alu_out : d_in;
             default: A <= A;
           endcase;
@@ -171,6 +170,7 @@ module cpu (
           X <= 0;
         else if (dst == DST_X)
           case (state)
+            FETCH: X <= arith ? alu_out : d_in;
             default: X <= X;
           endcase;
     end
@@ -185,6 +185,7 @@ module cpu (
            Y <= 0;
         else if (dst == DST_Y)
           case (state)
+            FETCH: Y <= arith ? alu_out : d_in;
             default: Y <= Y;
           endcase;
      end
@@ -195,11 +196,15 @@ module cpu (
 
    always_ff @ (posedge clk)
      begin
-        case (state)
-          default: P <= {sign, over, X[0], Y[0], 2'b00, zero, cout}; // some bs
-        endcase;
         if (reset)
            P <= 0;
+        else
+          case (state)
+            ABSX1,
+            ABSY1,
+            INDY2,
+            FETCH: P <= {sign, over, X[0], Y[0], 2'b00, zero, cout};
+          endcase;
      end
 
    /*
@@ -229,7 +234,6 @@ module cpu (
 
           ZPX1,
           ZPX2,
-          ZPX3,
 
           ZP1: PC <= PC;
           default: PC <= PC + 1;
@@ -338,7 +342,8 @@ module cpu (
 
           ZP1: addr = {8'b0, d_in};
 
-          ZPX3: addr = {8'b0, BAL};
+          ZPX1: addr = {8'b0, d_in};
+          ZPX2: addr = {8'b0, BAL};
 
           default: addr = PC;
         endcase;
@@ -380,7 +385,6 @@ module cpu (
 
          ZPX1,
          ZPX2,
-         ZPX3,
 
          ZP1
 
@@ -433,9 +437,7 @@ module cpu (
           ZP1:  state <= FETCH;
 
           ZPX1: state <= ZPX2;
-          ZPX2: state <= ZPX3;
-          ZPX3: state <= FETCH;
-
+          ZPX2: state <= FETCH;
 
           default: state <= FETCH;
         endcase;
@@ -545,21 +547,8 @@ module cpu (
     * ALU carry in
     */
 
-   always_comb
-     begin
-        case (state)
+   assign cin = reset ? 0 : P[0];
 
-          ABSX2: cin = P[0];
-          ABSY2: cin = P[0];
-
-          INDY2: cin = P[0];
-          INDY3: cin = P[0];
-
-          default: cin = 0;
-        endcase
-      if (reset)
-         write = 0;
-     end
 
    /*
     * ALU
