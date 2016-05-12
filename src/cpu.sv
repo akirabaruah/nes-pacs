@@ -157,6 +157,10 @@ module cpu (
    always_ff @ (posedge clk)
      begin
         case (state)
+          FETCH: begin 
+                 if (aaa == LDX && cc == 2'b10)
+                   X <= d_in;
+                 end
           default: X <= X;
         endcase;
          if (reset)
@@ -478,7 +482,6 @@ module cpu (
           INDY1: alu_b = d_in; // BAL
           INDY2: alu_b = d_in; // ADL
           INDY3: alu_b = d_in; // BAH
-
 
           ABSX1: alu_b = d_in; // ADL
           ABSX3: alu_b = P[0];
