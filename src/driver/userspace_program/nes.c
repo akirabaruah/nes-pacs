@@ -34,20 +34,19 @@ void print_state(nes_args *nes)
 
 int main(int argc, char *argv[])
 {
-	FILE * fd;
-	int mem_fd;
+	FILE * fd = NULL;
 	int ret = EXIT_FAILURE;
 	nes_args value;
 	off_t nes_base = LWHPS2FPGA_BRIDGE_BASE;
     char buffer[100];
-    char *p;
+    char *p = NULL;
 
 	printf("userspace NES program started\n\n");
 
 	/* open the memory device file */
 	// char *mem_file = "/sys/bus/platform/devices/nes/nes";
     char *mem_file = "/dev/mem";
-	mem_fd = open(mem_file, O_RDWR|O_SYNC);
+	int mem_fd = open(mem_file, O_RDWR|O_SYNC);
 	if (mem_fd < 0) {
 		perror("open");
 		exit(EXIT_FAILURE);
@@ -77,22 +76,29 @@ int main(int argc, char *argv[])
         return -1;
     }
 
+	printf("set nes_mem\n");
     /* get the delay_ctrl peripheral's base address */
 	nes_mem = (unsigned long *) (bridge_map + NES_OFFSET);
 
     for (;;) {
+		 printf("call fgets\n");
         if (!(fgets(buffer, 100, fd)))
         	break;
+
+
         if (buffer[0] == '\0' || buffer[0] == '\n' || buffer[0] == '#') {
             fclose(fd);
             break;
         }
-        while (*p) {
+		  p = buffer;
+		  printf("while loop\n");
+        while (p) {
             if (*p == '\n' || *p == '#')
                 *p = '\0';
                 break;
             p++;
         }
+		  printf("strktok\n");
         int temp;
         p = strtok(buffer," ");
         sscanf(p, "%x", &temp);
@@ -106,11 +112,16 @@ int main(int argc, char *argv[])
         
         // write the value 
 
+		printf("about to memcpy\n");
 		unsigned long mem_value;
-		memcpy(&mem_value, &value, 8);		
+		memcpy(&mem_value, &value, sizeof(nes_args));		
+
+		printf("about to write to board memory\n");
 		*nes_mem = mem_value;
 
 		usleep(100);
+
+		printf("print the state\n");
 		print_state((nes_args*)nes_mem);  // print
     }
 
@@ -125,7 +136,7 @@ int main(int argc, char *argv[])
 	print_state(&value);
 
 */
-
+	printf("munmap\n");
 	if (munmap(bridge_map, PAGE_SIZE) < 0) {
 		perror("munmap");
 		goto cleanup;
@@ -134,6 +145,6 @@ int main(int argc, char *argv[])
 	ret = 0;
 
 cleanup:
-	fclose(fd);
+	if (fd != NULL) fclose(fd);
 	return ret;
 }
