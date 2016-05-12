@@ -1,15 +1,24 @@
+parameter
+   RESET_CPU = 8'd0,
+	START_CPU = 8'd1,
+	PAUSE_CPU = 8'd2,
+	WRITE_MEM = 8'd3
+;
+
+
 module delay_ctrl (
-    input clk,
-    input faster,
-    input slower,
+    input logic clk,
+    input logic faster,
+    input logic slower,
 	 
-	 input reset,
+	 input logic reset,
 	 
-	 input read,
-    output [15:0] delay,
+	 input logic read,
+    output logic [15:0] delay,
 	 
-	 input write,
-	 input [15:0] writedata
+	 input logic write,
+	 input logic [15:0] writedata,
+	 input logic [15:0] address
 );
 // faster, slower are push buttons
 
