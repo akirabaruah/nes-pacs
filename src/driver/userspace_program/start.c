@@ -38,7 +38,8 @@ int main(int argc, char *argv[])
 	int mem_fd;
 	int ret = EXIT_FAILURE;
 	off_t nes_base = LWHPS2FPGA_BRIDGE_BASE;
-
+   char memory[MEMSIZE];
+   memset((char *)memory, 0, sizeof(memory));
 
 	/* open the memory device file */
 	// char *mem_file = "/sys/bus/platform/devices/nes/nes";
@@ -61,16 +62,14 @@ int main(int argc, char *argv[])
 
 	printf("mmap done\n");
 
+	printf("loading program into memory\n");
 
     /* get the delay_ctrl peripheral's base address */
 	nes_mem = (unsigned char *) (bridge_map + NES_OFFSET);
   	printf("passed nes_mem\n"); 
-   int x = 0;
 
-  	while (x < PAGE_SIZE) {
-		printf("read %x\n", nes_mem[2 * x]);
-		x++;
-	}
+		nes_mem[1] = (char)1; //CPU_START
+
 
 	printf("munmap\n");
 	if (munmap(bridge_map, PAGE_SIZE) < 0) {
