@@ -15,7 +15,7 @@ sim:
 
 # Verilator
 V%: %.sv $(TESTDIR)/%_tb.cpp
-	verilator -Wall -Wno-lint --cc $< $(SUBMODULES) --exe $(word 2,$^)
+	verilator +define+$(def) -Wall -Wno-lint --cc $< $(SUBMODULES) --exe $(word 2,$^)
 	make --quiet -C obj_dir/ -j -f $@.mk $@
 
 # xa65 (6502 assembler)
