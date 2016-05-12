@@ -155,7 +155,6 @@ module cpu (
            A <= 0;
         else if (dst == DST_A)
           case (state)
-            DECODE: A <= A;
             FETCH: A <= arith ? alu_out : d_in;
             default: A <= A;
           endcase;
@@ -171,6 +170,7 @@ module cpu (
           X <= 0;
         else if (dst == DST_X)
           case (state)
+            FETCH: X <= arith ? alu_out : d_in;
             default: X <= X;
           endcase;
     end
@@ -185,6 +185,7 @@ module cpu (
            Y <= 0;
         else if (dst == DST_Y)
           case (state)
+            FETCH: Y <= arith ? alu_out : d_in;
             default: Y <= Y;
           endcase;
      end
