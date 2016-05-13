@@ -1,14 +1,14 @@
 CC=arm-linux-gnueabihf-gcc
 CFLAGS=-Wall -O2
 
-all: nes nes2
+all: write read start
 
-nes2: nes2.c
+write: write.c
 	$(CC) $(CFLAGS) $(LDFLAGS) $< -o $@
 
+read: read.c
 
-nes: nes.c
-	$(CC) $(CFLAGS) $(LDFLAGS) $< -o $@
+start: start.c
 
 clean:
-	rm -f nes
+	rm -f write start read

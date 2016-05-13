@@ -9,7 +9,6 @@ module delay_ctrl (
     input logic clk,
     input logic faster,
     output logic slower,
-	 //output logic [3:0] blink_delay,
 	 
 	 input logic reset,
 	 
@@ -21,12 +20,11 @@ module delay_ctrl (
 	 input logic [15:0] address
 );
 
-
 logic cpu_ready;
 logic sync;
 logic cpu_write, mem_write, cpu_reset;
 logic [15:0] cpu_addr, mem_addr;
-logic [7:0] d_out, mem_in, mem_out;
+logic [7:0] cpu_in, cpu_out, mem_in, mem_out;
 logic [7:0] nes_op;                       // our own NES opcodes
 
 logic [15:0] tmp_data;
@@ -34,7 +32,8 @@ logic [15:0] tmp_data;
 assign nes_op = writedata[15:8];
 
 initial begin
-	tmp_data = 6;
+	tmp_data = 0;
+	slower <= 0;
 end
 
 //logic [3:0] delay_intern = 4'b1000;
@@ -44,10 +43,12 @@ end
 
 always_ff @(posedge clk) begin
 	if (write) begin
-		tmp_data <= tmp_data + 1;
+		slower <= 1;
+	end else begin
+		slower <= 0;
 	end
 
-	if (read) begin
+	/*if (read) begin
 		slower <= 1;
  		readdata <= tmp_data;
 	end else begin
@@ -55,7 +56,7 @@ always_ff @(posedge clk) begin
  		readdata <= 7;
 	end
 
-	readdata <= tmp_data;
+	readdata <= tmp_data;*/
 end
 
 cpu c (
@@ -64,10 +65,10 @@ cpu c (
    .ready (cpu_ready),
    .irq (0),
    .nmi (0),
-   .d_in (mem_out),
+   .d_in (cpu_in),
    .write (cpu_write),
    .sync (sync),
-   .d_out (d_out),
+   .d_out (cpu_out),
    .addr (cpu_addr)
 );
 
@@ -79,42 +80,98 @@ memory mem (
    .out (mem_out)
 );
 
+assign readdata = {8'd0, mem_out};
+assign cpu_in = mem_out;
 
-always_ff @ (posedge clk) begin
-   case (nes_op)
-      RESET_CPU: begin
-         cpu_ready <= 0;
-         cpu_reset <= 1;
-         end
-      WRITE_MEM: begin
-         cpu_ready <= 0;
-         mem_write <= 1;
-         mem_addr <= address;
-         mem_in <= writedata[7:0];
-         end
-      PAUSE_CPU: begin
-         cpu_ready <= 0;
-         cpu_reset <= 0;
-		end
-      START_CPU: begin
-         cpu_ready <= 1;
-         cpu_reset <= 0;
-         mem_in <= d_out;
-         mem_write <= cpu_write;
-         mem_addr <= cpu_addr;
-         end
-      default: begin             // keep running CPU
-         cpu_ready <= 1;
-         cpu_reset <= 0;
-         mem_in <= d_out;
-         mem_write <= cpu_write;
-         mem_addr <= cpu_addr;
-         end
-   endcase
+always_comb begin
 
-   //TODO: readdata[7:0] <= mem_out;
+	if (interface_on) begin
+		 mem_write = write;
+		 mem_in = writedata[7:0];
+		 mem_addr = address;
+	end else begin
+		mem_write = cpu_write;
+		mem_addr = cpu_addr;
+		mem_in = cpu_out;
+	end
 
 end
+		
+/*
+always_comb begin
+
+	if (write) begin
+		
+	end else if (read) begin
+		
+	end else
+	
+	end
+
+end
+*/
+
+logic interface_on = 1;
+always_ff @(posedge clk)
+begin
+	case (nes_op)
+		WRITE_MEM: interface_on <= 1;
+		RESET_CPU: interface_on <= 1;
+		START_CPU: interface_on <= 0;
+	endcase	
+end
+
+always_comb begin
+
+	if (interface_on) begin	
+		cpu_ready = 0;
+		cpu_reset = 1;
+   end else begin
+		cpu_reset = 0;
+		cpu_ready = 1;
+	end
+end
+		/*
+always_comb begin
+	case (nes_op)
+		RESET_CPU: begin
+			cpu_ready = 0;
+			cpu_reset = 1;
+			mem_write = cpu_write;
+			mem_addr = cpu_addr;
+			mem_in = d_out;
+		end
+		WRITE_MEM: begin
+			cpu_ready = 0;
+			cpu_reset = 0;
+			mem_write = 1;
+			mem_addr = address;
+			mem_in = writedata[7:0];
+		end
+		PAUSE_CPU: begin
+			cpu_ready = 0;
+			cpu_reset = 0;
+			mem_write = cpu_write;
+			mem_addr = cpu_addr;
+			mem_in = d_out;
+		end
+		START_CPU: begin
+			cpu_ready = 1;
+			cpu_reset = 0;
+			mem_write = cpu_write;
+			mem_addr = cpu_addr;
+			mem_in = d_out;
+		end
+		default: begin
+			cpu_ready <= 1;
+         cpu_reset <= 0;
+         mem_in <= d_out;
+         mem_write <= cpu_write;
+         mem_addr <= cpu_addr;
+		end
+	endcase
+end
+*/
 endmodule
 
 

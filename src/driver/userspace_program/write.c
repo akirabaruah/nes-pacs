@@ -37,7 +37,6 @@ int main(int argc, char *argv[])
 {
 	int mem_fd;
 	int ret = EXIT_FAILURE;
-	nes_args value;
 	off_t nes_base = LWHPS2FPGA_BRIDGE_BASE;
    char memory[MEMSIZE];
    memset((char *)memory, 0, sizeof(memory));
@@ -85,65 +84,15 @@ int main(int argc, char *argv[])
     /* get the delay_ctrl peripheral's base address */
 	nes_mem = (unsigned char *) (bridge_map + NES_OFFSET);
   	printf("passed nes_mem\n"); 
+
    int x = 0;
    while (x < len) {
-		printf("%d: writing %d to memory\n", x, memory[x]);
+		printf("%d: writing %x to memory\n", x, memory[x]);
 		nes_mem[2 * x] = memory[x];
-		//sleep(1);
+		nes_mem[1] = (char)3; //CPU_WRITE
 		x++;
 	}
-	x = 0;
-	while (x < len) {
-		printf("read %d\n", nes_mem[2 * x]);
-		x++;
-	}
-	printf("finished while loop\n");
-/*
-    for (;;) {
-        if (!(fgets(buffer, 100, fd)))
-        	break;
-        if (buffer[0] == '\0' || buffer[0] == '\n' || buffer[0] == '#') {
-            fclose(fd);
-            break;
-        }
-        while (*p) {
-            if (*p == '\n' || *p == '#')
-                *p = '\0';
-                break;
-            p++;
-        }
-        int temp;
-        p = strtok(buffer," ");
-        sscanf(p, "%x", &temp);
-        value.nes_op = (char) temp;
-        p = strtok (NULL, " ");
-        sscanf(p, "%x", &temp);
-        value.nes_in = (char) temp;
-        p = strtok (NULL, " ");
-        sscanf(p, "%x", &temp);
-        value.address = (short) temp;
-        
-        // write the value 
 
-		unsigned long mem_value;
-		memcpy(&mem_value, &value, 8);		
-		*nes_mem = mem_value;
-
-		usleep(100);
-		print_state((nes_args*)nes_mem);  // print
-    }
-*/
-/*
-	int temp;
-	value.nes_op = (char) temp;
-	value.nes_in = (char) temp;
-	value.address = (short) temp;
-
-	*nes_mem = value;
-	usleep(100);
-	print_state(&value);
-
-*/
 
 	printf("munmap\n");
 	if (munmap(bridge_map, PAGE_SIZE) < 0) {
